@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
 
 from volty.config import settings
 from volty.models.schemas import (
@@ -24,6 +26,14 @@ smard = SmardClient()
 @router.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok", "service": "volty"}
+
+
+@router.get("/schemas/optimize-request")
+async def optimize_request_schema() -> FileResponse:
+    path = Path(__file__).resolve().parents[3] / "docs" / "schemas" / "optimize-request.schema.json"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Schema file missing")
+    return FileResponse(path, media_type="application/schema+json")
 
 
 @router.get("/smard/filters")
