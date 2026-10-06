@@ -7,13 +7,13 @@ Planificación y optimización del consumo eléctrico con datos reales (Energy-C
 | Ruta | Qué es |
 |------|--------|
 | `backend/` | API FastAPI — **solo usar `backend/.venv`**, nunca pip global |
-| `frontend/` | UI Vite + TypeScript |
+| `frontend/` | UI Next.js (App Router) + Relieve (`DESING.MD`) |
 | `Makefile` | Comandos habituales de setup, test y dev |
 
 ## Requisitos
 
 - Python 3.11+
-- Node.js 20+ (`pnpm` o `npm` en `frontend/`)
+- Node.js 20+ y npm en `frontend/`
 - Make (opcional pero recomendado)
 
 ## Primer uso
@@ -30,7 +30,7 @@ En dos terminales:
 
 ```bash
 make dev-backend    # http://127.0.0.1:8000 — /health incluye estado de BD
-make dev-frontend   # http://127.0.0.1:5173
+make dev-frontend   # http://127.0.0.1:3000
 ```
 
 Sin Make, mismos pasos en [`backend/README.md`](backend/README.md).

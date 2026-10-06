@@ -66,6 +66,12 @@ export async function fetchPrices(): Promise<PriceSeriesResponse> {
   return res.json();
 }
 
+export async function fetchRenewableShare(): Promise<{ days: Record<string, number> }> {
+  const res = await fetch(`${API}/renewable-share`);
+  if (!res.ok) return { days: {} };
+  return res.json();
+}
+
 export async function interpret(message: string): Promise<ParsedIntent> {
   const res = await fetch(`${API}/interpret`, {
     method: "POST",
@@ -85,9 +91,6 @@ export async function optimize(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ loads, preferences }),
   });
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(detail);
-  }
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

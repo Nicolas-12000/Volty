@@ -75,6 +75,23 @@ async def get_prices(
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
+@router.get("/renewable-share")
+async def renewable_share() -> dict:
+    tz = ZoneInfo(settings.timezone)
+    now = datetime.now(tz)
+    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    end = start + timedelta(days=3)
+    try:
+        shares = await client.fetch_renewable_share(start, end)
+        return {
+            "unit": "percent",
+            "days": {k.date().isoformat(): v for k, v in shares.items()},
+            "source": "energy-charts",
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
 @router.post("/interpret", response_model=ParsedIntent)
 async def interpret(body: NaturalLanguageRequest) -> ParsedIntent:
     try:

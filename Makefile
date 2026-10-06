@@ -8,12 +8,12 @@ help:
 	@echo "Volty — targets"
 	@echo "  make setup            venv + pip + npm install"
 	@echo "  make setup-backend    Python venv en backend/.venv"
-	@echo "  make setup-frontend   npm install en frontend/"
+	@echo "  make setup-frontend   npm install en frontend/ (Next.js)"
 	@echo "  make db-up            PostgreSQL (Docker)"
 	@echo "  make db-migrate       alembic upgrade head"
 	@echo "  make test             pytest (backend)"
 	@echo "  make dev-backend      API en :8000"
-	@echo "  make dev-frontend     UI en :5173 (proxy /api → backend)"
+	@echo "  make dev-frontend     UI en :3000 (rewrite /api → backend)"
 	@echo "  make clean-backend-venv  borra backend/.venv"
 
 setup: setup-backend setup-frontend
@@ -24,7 +24,7 @@ setup-backend:
 	$(VENV)/pip install -r $(BACKEND)/requirements-dev.txt
 
 setup-frontend:
-	cd $(FRONTEND) && (command -v pnpm >/dev/null 2>&1 && pnpm install || npm install)
+	cd $(FRONTEND) && npm install
 
 db-up:
 	docker compose up -d db

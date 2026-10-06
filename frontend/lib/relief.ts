@@ -12,19 +12,19 @@ export function reliefLabel(c: ReliefClass): string {
   return LABELS[c];
 }
 
-export function classifyRelief(prices: number[]): ReliefClass[] {
-  if (prices.length === 0) return [];
-  const sorted = [...prices].sort((a, b) => a - b);
+function thresholdsFromHorizon(horizon: number[]) {
+  const sorted = [...horizon].sort((a, b) => a - b);
   const pick = (p: number) => {
     const idx = Math.min(sorted.length - 1, Math.floor(p * sorted.length));
     return sorted[idx];
   };
-  const t20 = pick(0.2);
-  const t40 = pick(0.4);
-  const t60 = pick(0.6);
-  const t80 = pick(0.8);
+  return { t20: pick(0.2), t40: pick(0.4), t60: pick(0.6), t80: pick(0.8) };
+}
 
-  return prices.map((v) => {
+export function classifyReliefHorizon(horizon: number[], slice: number[]): ReliefClass[] {
+  if (!slice.length) return [];
+  const { t20, t40, t60, t80 } = thresholdsFromHorizon(horizon.length ? horizon : slice);
+  return slice.map((v) => {
     if (v <= t20) return "valle-hondo";
     if (v <= t40) return "valle";
     if (v <= t60) return "llano";

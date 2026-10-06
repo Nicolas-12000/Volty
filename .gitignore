@@ -10,6 +10,7 @@ backend/.venv/
 .ruff_cache/
 backend/data/cache/
 node_modules/
-frontend/dist/
+frontend/.next/
+frontend/out/
 .DS_Store
 VOLTY.md 
