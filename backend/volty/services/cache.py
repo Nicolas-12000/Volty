@@ -1,32 +1,47 @@
-import hashlib
-import json
+from __future__ import annotations
+
 import time
-from pathlib import Path
+from datetime import datetime, timezone
 from typing import Any
 
+from sqlalchemy.dialects.postgresql import insert
 
-class FileCache:
-    def __init__(self, directory: Path, ttl_seconds: int) -> None:
-        self.directory = directory
+from volty.db.models import ApiCacheEntry, IngestedSnapshot
+from volty.db.session import get_session_factory
+
+
+class PostgresCacheStore:
+    """Caché con TTL en PostgreSQL e histórico append-only."""
+
+    def __init__(self, ttl_seconds: int, source: str = "external") -> None:
         self.ttl_seconds = ttl_seconds
-        self.directory.mkdir(parents=True, exist_ok=True)
-
-    def _path(self, key: str) -> Path:
-        digest = hashlib.sha256(key.encode()).hexdigest()
-        return self.directory / f"{digest}.json"
+        self.source = source
 
     def get(self, key: str) -> Any | None:
-        path = self._path(key)
-        if not path.exists():
-            return None
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        if time.time() - payload["stored_at"] > self.ttl_seconds:
-            return None
-        return payload["data"]
+        with get_session_factory()() as session:
+            row = session.get(ApiCacheEntry, key)
+            if row is None:
+                return None
+            age = time.time() - row.stored_at.timestamp()
+            if age > self.ttl_seconds:
+                return None
+            return row.payload
 
     def set(self, key: str, data: Any) -> None:
-        path = self._path(key)
-        path.write_text(
-            json.dumps({"stored_at": time.time(), "data": data}, ensure_ascii=False),
-            encoding="utf-8",
-        )
+        now = datetime.now(timezone.utc)
+        with get_session_factory()() as session:
+            stmt = insert(ApiCacheEntry).values(cache_key=key, payload=data, stored_at=now)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=[ApiCacheEntry.cache_key],
+                set_={"payload": data, "stored_at": now},
+            )
+            session.execute(stmt)
+            session.add(
+                IngestedSnapshot(
+                    source=self.source,
+                    cache_key=key,
+                    payload=data,
+                    fetched_at=now,
+                )
+            )
+            session.commit()

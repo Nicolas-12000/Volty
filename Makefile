@@ -1,4 +1,4 @@
-.PHONY: help setup setup-backend setup-frontend test dev-backend dev-frontend clean-backend-venv
+.PHONY: help setup setup-backend setup-frontend test dev-backend dev-frontend clean-backend-venv db-up db-down db-migrate
 
 BACKEND := backend
 FRONTEND := frontend
@@ -9,6 +9,8 @@ help:
 	@echo "  make setup            venv + pip + npm install"
 	@echo "  make setup-backend    Python venv en backend/.venv"
 	@echo "  make setup-frontend   npm install en frontend/"
+	@echo "  make db-up            PostgreSQL (Docker)"
+	@echo "  make db-migrate       alembic upgrade head"
 	@echo "  make test             pytest (backend)"
 	@echo "  make dev-backend      API en :8000"
 	@echo "  make dev-frontend     UI en :5173 (proxy /api → backend)"
@@ -23,6 +25,15 @@ setup-backend:
 
 setup-frontend:
 	cd $(FRONTEND) && (command -v pnpm >/dev/null 2>&1 && pnpm install || npm install)
+
+db-up:
+	docker compose up -d db
+
+db-down:
+	docker compose down
+
+db-migrate:
+	cd $(BACKEND) && $(VENV)/alembic upgrade head
 
 test:
 	cd $(BACKEND) && $(VENV)/pytest -q

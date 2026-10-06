@@ -7,14 +7,14 @@ import httpx
 
 from volty.config import settings
 from volty.models.schemas import PricePoint, PriceSeriesResponse
-from volty.services.cache import FileCache
+from volty.services.cache import PostgresCacheStore
 
 BASE_URL = "https://api.energy-charts.info"
 
 
 class EnergyChartsClient:
     def __init__(self) -> None:
-        self.cache = FileCache(settings.cache_dir, settings.cache_ttl_seconds)
+        self.cache = PostgresCacheStore(settings.cache_ttl_seconds, source="energy-charts")
         self.tz = ZoneInfo(settings.timezone)
 
     async def fetch_prices(

@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 import httpx
 
 from volty.config import settings
-from volty.services.cache import FileCache
+from volty.services.cache import PostgresCacheStore
 
 BASE_URL = "https://www.smard.de/app/chart_data"
 
@@ -27,7 +27,7 @@ SMARD_FILTERS: dict[int, str] = {
 
 class SmardClient:
     def __init__(self) -> None:
-        self.cache = FileCache(settings.cache_dir, settings.cache_ttl_seconds)
+        self.cache = PostgresCacheStore(settings.cache_ttl_seconds, source="smard")
         self.tz = ZoneInfo(settings.timezone)
 
     async def fetch_series(

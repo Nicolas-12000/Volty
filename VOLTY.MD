@@ -114,11 +114,11 @@ La IA no sustituye al optimizador: traduce intención del usuario → parámetro
 |------|--------|--------|
 | Schema JSON de restricciones | Hecho | `docs/schemas/optimize-request.schema.json` |
 | Mercado DE-LU, intervalos 15 min | Hecho | Energy-Charts `/v2/price` |
-| Ingesta + caché de precios | Hecho | `backend/volty/services/energy_charts.py` |
+| Ingesta + caché de precios | Hecho | Energy-Charts; caché TTL en PostgreSQL |
 | Optimizador LP + baselines | Hecho | ASAP y uniforme; multi-carga independiente |
 | API interpret NL | Hecho | Reglas ES + OpenAI opcional |
 | UI planificación | Hecho | `frontend/` — formulario + NL |
 | SMARD (series mercado) | Hecho | `GET /api/smard/series` |
-| Histórico persistente (BD) | Pendiente | Solo caché en disco por ahora |
+| Histórico persistente (BD) | Hecho | PostgreSQL (`docker compose`) + `ingested_snapshots` |
 | Multi-carga con límite de potencia hogar | Pendiente | |
 | Predicción precios / renovables | Pendiente | Extensión IA |

@@ -13,6 +13,7 @@ from volty.models.schemas import (
     ParsedIntent,
     PriceSeriesResponse,
 )
+from volty.db.session import check_database_connection
 from volty.services.energy_charts import EnergyChartsClient
 from volty.services.nl_interpreter import parse_natural_language
 from volty.services.optimizer import optimize_loads
@@ -25,7 +26,9 @@ smard = SmardClient()
 
 @router.get("/health")
 async def health() -> dict[str, str]:
-    return {"status": "ok", "service": "volty"}
+    db_ok = check_database_connection()
+    status = "ok" if db_ok else "degraded"
+    return {"status": status, "service": "volty", "database": "up" if db_ok else "down"}
 
 
 @router.get("/schemas/optimize-request")
