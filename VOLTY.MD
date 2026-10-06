@@ -117,7 +117,7 @@ La IA no sustituye al optimizador: traduce intención del usuario → parámetro
 | Ingesta + caché de precios | Hecho | Energy-Charts; caché TTL en PostgreSQL |
 | Optimizador LP + baselines | Hecho | ASAP y uniforme; multi-carga independiente |
 | API interpret NL | Hecho | Reglas ES + OpenAI opcional |
-| UI planificación | Hecho | `frontend/` — formulario + NL |
+| UI planificación | Hecho | Relieve (`DESING.md`) — Tailwind v4, franja, chips IA |
 | SMARD (series mercado) | Hecho | `GET /api/smard/series` |
 | Histórico persistente (BD) | Hecho | PostgreSQL (`docker compose`) + `ingested_snapshots` |
 | Multi-carga con límite de potencia hogar | Pendiente | |

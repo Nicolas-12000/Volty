@@ -1,0 +1,197 @@
+@import "@fontsource-variable/archivo";
+@import "./tokens.css";
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: var(--volty-primary);
+  --color-on-primary: var(--volty-on-primary);
+  --color-secondary: var(--volty-secondary);
+  --color-tertiary: var(--volty-tertiary);
+  --color-on-tertiary: var(--volty-on-tertiary);
+  --color-tertiary-container: var(--volty-tertiary-container);
+  --color-neutral: var(--volty-neutral);
+  --color-surface: var(--volty-surface);
+  --color-outline: var(--volty-outline);
+  --color-valle-hondo: var(--volty-valle-hondo);
+  --color-valle: var(--volty-valle);
+  --color-llano: var(--volty-llano);
+  --color-loma: var(--volty-loma);
+  --color-cima: var(--volty-cima);
+  --color-hoja: var(--volty-hoja);
+  --color-aviso: var(--volty-aviso);
+  --color-error: var(--volty-error);
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --font-sans: "Archivo Variable", Archivo, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-variation-settings: "wdth" 100;
+  }
+
+  body {
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--volty-tertiary);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .type-display {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    font-variation-settings: "wdth" 118;
+  }
+
+  @media (min-width: 1024px) {
+    .type-display {
+      font-size: 3.25rem;
+    }
+  }
+
+  .type-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    font-variation-settings: "wdth" 112;
+  }
+
+  .type-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    font-variation-settings: "wdth" 100;
+  }
+
+  .type-body-md {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    font-variation-settings: "wdth" 100;
+  }
+
+  .type-body-sm {
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    font-variation-settings: "wdth" 100;
+  }
+
+  .type-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+    font-variation-settings: "wdth" 100;
+  }
+
+  .type-num-xl {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "wdth" 75;
+  }
+
+  @media (min-width: 1024px) {
+    .type-num-xl {
+      font-size: 4.5rem;
+    }
+  }
+
+  .type-num-lg {
+    font-size: 1.75rem;
+    font-weight: 600;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "wdth" 78;
+  }
+
+  .type-num-md {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "wdth" 90;
+  }
+
+  .type-num-sm {
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: "wdth" 80;
+  }
+
+  .bg-relief-valle-hondo {
+    background-color: var(--volty-valle-hondo);
+  }
+  .bg-relief-valle {
+    background-color: var(--volty-valle);
+  }
+  .bg-relief-llano {
+    background-color: var(--volty-llano);
+  }
+  .bg-relief-loma {
+    background-color: var(--volty-loma);
+  }
+  .bg-relief-cima {
+    background-color: var(--volty-cima);
+  }
+
+  .chip-draft {
+    border: 1px dashed var(--volty-secondary);
+  }
+
+  .chip-solid {
+    border: 1px solid var(--volty-outline);
+  }
+
+  .composer-shadow {
+    box-shadow: 0 -4px 16px rgb(29 26 51 / 8%);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .composer-shadow {
+      box-shadow: none;
+      border-top: 1px solid var(--volty-outline);
+    }
+  }
+
+  [data-theme="dark"] .composer-shadow {
+    box-shadow: none;
+    border-top: 1px solid var(--volty-outline);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .strip-bar {
+      animation: none !important;
+    }
+  }
+
+  @keyframes strip-grow {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  .strip-bar-animate {
+    transform-origin: bottom;
+    animation: strip-grow 600ms ease-out forwards;
+  }
+}

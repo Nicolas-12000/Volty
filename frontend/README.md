@@ -1,10 +1,10 @@
-# Frontend Volty
+# Volty — frontend (Relieve)
 
-Vite + TypeScript. En desarrollo, `/api` se proxya al backend en `:8000` (ver `vite.config.ts`).
+UI según `DESING.md`: Tailwind v4, tokens en `src/styles/tokens.css`, Archivo variable autoalojada.
 
 ```bash
 pnpm install   # o npm install
 pnpm dev
 ```
 
-Build producción: `pnpm build` → `dist/` (ignorado por git).
+Proxy de API: `vite.config.ts` → `http://127.0.0.1:8000`.

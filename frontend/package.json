@@ -1,15 +1,20 @@
 {
-  "name": "frontend",
+  "name": "volty-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.2.5"
+  },
   "devDependencies": {
-    "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "@tailwindcss/vite": "^4.1.4",
+    "tailwindcss": "^4.1.4",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.7"
   }
 }

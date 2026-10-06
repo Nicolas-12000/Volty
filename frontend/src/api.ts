@@ -10,6 +10,19 @@ export type LoadSpec = {
   must_run?: boolean;
 };
 
+export type PricePoint = {
+  timestamp: string;
+  price_eur_per_mwh: number;
+};
+
+export type PriceSeriesResponse = {
+  bidding_zone: string;
+  interval_minutes: number;
+  unit: string;
+  points: PricePoint[];
+  source: string;
+};
+
 export type OptimizeResponse = {
   plans: Array<{
     load_id: string;
@@ -41,6 +54,18 @@ export type ParsedIntent = {
   confidence: string;
 };
 
+export async function fetchHealth(): Promise<{ status: string; database?: string }> {
+  const res = await fetch(`${API}/health`);
+  if (!res.ok) throw new Error("Sin conexión");
+  return res.json();
+}
+
+export async function fetchPrices(): Promise<PriceSeriesResponse> {
+  const res = await fetch(`${API}/prices`);
+  if (!res.ok) throw new Error("No llegan los precios del mercado. Reintenta o revisa la conexión.");
+  return res.json();
+}
+
 export async function interpret(message: string): Promise<ParsedIntent> {
   const res = await fetch(`${API}/interpret`, {
     method: "POST",
@@ -60,13 +85,9 @@ export async function optimize(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ loads, preferences }),
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(detail);
+  }
   return res.json();
-}
-
-export function defaultDeadlineTomorrow7am(): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  d.setHours(7, 0, 0, 0);
-  return d.toISOString();
 }
