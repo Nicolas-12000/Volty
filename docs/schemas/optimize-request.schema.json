@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://volty.local/schemas/optimize-request.json",
+  "title": "VoltyOptimizeRequest",
+  "description": "Restricciones estructuradas consumidas por el optimizador (y emitidas por NL/IA).",
+  "type": "object",
+  "required": ["loads"],
+  "properties": {
+    "loads": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/load" }
+    },
+    "preferences": { "$ref": "#/$defs/preferences" },
+    "price_start": { "type": ["string", "null"], "format": "date-time" },
+    "price_end": { "type": ["string", "null"], "format": "date-time" }
+  },
+  "$defs": {
+    "load": {
+      "type": "object",
+      "required": ["name", "energy_kwh", "deadline"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "energy_kwh": { "type": "number", "exclusiveMinimum": 0 },
+        "max_power_kw": { "type": "number", "exclusiveMinimum": 0, "default": 11 },
+        "window_start": { "type": ["string", "null"], "format": "date-time" },
+        "deadline": { "type": "string", "format": "date-time" },
+        "must_run": { "type": "boolean", "default": false }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "objective": {
+          "type": "string",
+          "enum": ["minimize_cost", "balance_cost_renewables"]
+        },
+        "renewable_weight": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

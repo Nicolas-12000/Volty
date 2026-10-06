@@ -1,0 +1,18 @@
+[project]
+name = "volty-backend"
+version = "0.1.0"
+description = "Volty — optimización de consumo eléctrico"
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["volty*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
