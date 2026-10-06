@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from scipy.optimize import linprog
 
-from volty.models.schemas import (
+from volty.core.schemas import (
     BaselineComparison,
     IntervalAssignment,
     LoadPlan,

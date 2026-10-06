@@ -6,8 +6,8 @@ from typing import Any
 
 from sqlalchemy.dialects.postgresql import insert
 
-from volty.db.models import ApiCacheEntry, IngestedSnapshot
-from volty.db.session import get_session_factory
+from volty.core.db.models import ApiCacheEntry, IngestedSnapshot
+from volty.core.db.session import get_session_factory
 
 
 class PostgresCacheStore:

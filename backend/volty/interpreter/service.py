@@ -7,8 +7,8 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
-from volty.config import settings
-from volty.models.schemas import LoadSpec, NaturalLanguageRequest, Objective, OptimizationPreferences, ParsedIntent
+from volty.core.config import settings
+from volty.core.schemas import LoadSpec, NaturalLanguageRequest, Objective, OptimizationPreferences, ParsedIntent
 
 
 def parse_natural_language(request: NaturalLanguageRequest) -> ParsedIntent:

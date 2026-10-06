@@ -3,8 +3,8 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from volty.models.schemas import LoadSpec, Objective, OptimizationPreferences, PricePoint
-from volty.services.optimizer import optimize_loads
+from volty.core.schemas import LoadSpec, Objective, OptimizationPreferences, PricePoint
+from volty.optimizer import optimize_loads
 
 
 def test_optimizer_picks_cheapest_slots():

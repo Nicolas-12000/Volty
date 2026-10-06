@@ -315,7 +315,7 @@ Hoy el MVP es un **monolito FastAPI** (`uvicorn`, un proceso, todas las rutas en
 | Un solo `main.py` + `routes.py` | Cuatro handlers Lambda + API Gateway |
 | Ingesta en petición HTTP (`fetch_prices` cache miss) | Ingesta **solo** en `data-ingestion` + EventBridge; API lee RDS |
 | NL en proceso API (`nl_interpreter.py`) | Módulo compartido invocado desde **AI Lambda**; API solo orquesta |
-| Optimizer en proceso API | Paquete `volty.services.optimizer` en **Optimization Lambda** |
+| Optimizer en proceso API | Paquete `volty.optimizer` en **Optimization Lambda** |
 | `PostgresCacheStore` + snapshots en misma app | Misma BD; escritura de ingesta restringida al worker |
 | Sin auth | JWT en **API Lambda** (`JWT_SECRET`) |
 | Docker Compose Postgres local | RDS en prod; Compose/local solo para dev |
@@ -335,7 +335,7 @@ backend/volty/
 
 **Orden de refactor recomendado (alineado con commits):**
 
-1. Extraer módulos sin cambiar comportamiento (core / optimizer / interpreter / ingestion).
+1. ~~Extraer módulos sin cambiar comportamiento (core / optimizer / interpreter / ingestion).~~ **Hecho** — ver `backend/volty/{core,optimizer,interpreter,ingestion,api}/`.
 2. Añadir tablas normalizadas de precios (más allá de JSONB snapshot) para el optimizador.
 3. Script o Lambda `data-ingestion` + regla EventBridge (local: cron manual o `make ingest`).
 4. Handlers Lambda finos + tests unitarios por paquete.

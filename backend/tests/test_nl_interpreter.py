@@ -1,5 +1,5 @@
-from volty.services.nl_interpreter import parse_natural_language
-from volty.models.schemas import NaturalLanguageRequest
+from volty.core.schemas import NaturalLanguageRequest
+from volty.interpreter import parse_natural_language
 
 
 def test_parse_spanish_ev_request():

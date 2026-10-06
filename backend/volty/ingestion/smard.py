@@ -8,8 +8,8 @@ from zoneinfo import ZoneInfo
 
 import httpx
 
-from volty.config import settings
-from volty.services.cache import PostgresCacheStore
+from volty.core.config import settings
+from volty.ingestion.cache import PostgresCacheStore
 
 BASE_URL = "https://www.smard.de/app/chart_data"
 

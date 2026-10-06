@@ -5,19 +5,18 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
-from volty.config import settings
-from volty.models.schemas import (
+from volty.core.config import settings
+from volty.core.schemas import (
     NaturalLanguageRequest,
     OptimizeRequest,
     OptimizeResponse,
     ParsedIntent,
     PriceSeriesResponse,
 )
-from volty.db.session import check_database_connection
-from volty.services.energy_charts import EnergyChartsClient
-from volty.services.nl_interpreter import parse_natural_language
-from volty.services.optimizer import optimize_loads
-from volty.services.smard import SMARD_FILTERS, SmardClient
+from volty.core.db.session import check_database_connection
+from volty.ingestion import EnergyChartsClient, SMARD_FILTERS, SmardClient
+from volty.interpreter import parse_natural_language
+from volty.optimizer import optimize_loads
 
 router = APIRouter()
 client = EnergyChartsClient()

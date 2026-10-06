@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from volty.config import settings
+from volty.core.config import settings
 
 
 @lru_cache
