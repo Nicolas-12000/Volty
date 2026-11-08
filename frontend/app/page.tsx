@@ -1,5 +1,5 @@
-import { VoltyApp } from "@/components/volty-app";
+import { MarketHome } from "@/components/home/market-home";
 
-export default function Home() {
-  return <VoltyApp />;
+export default function HomePage() {
+  return <MarketHome />;
 }
