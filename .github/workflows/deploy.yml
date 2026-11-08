@@ -1,0 +1,63 @@
+name: Deploy AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Ejecutar terraform apply (si no, solo plan)"
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Backend test + Lambda zips
+        run: |
+          cd backend
+          python -m venv .venv
+          .venv/bin/pip install -r requirements-dev.txt
+          .venv/bin/pytest -q
+          cd ..
+          ./scripts/build-lambdas.sh
+
+      - name: Terraform init
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
+        run: terraform -chdir=infra/terraform init -input=false
+
+      - name: Terraform plan
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
+          TF_VAR_jwt_secret: ${{ secrets.TF_VAR_JWT_SECRET }}
+          TF_VAR_gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+        run: terraform -chdir=infra/terraform plan -out=tfplan
+
+      - name: Terraform apply
+        if: inputs.apply
+        env:
+          AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
+        run: terraform -chdir=infra/terraform apply -input=false tfplan
+
+      - name: Upload plan
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: infra/terraform/tfplan
