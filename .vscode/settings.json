@@ -9,7 +9,7 @@
     "!GetAZs",
     "!If",
     "!ImportValue",
-    "!Join",
+    "!Join sequence",
     "!Not",
     "!Or",
     "!Ref",
@@ -19,9 +19,13 @@
     "!Transform"
   ],
   "yaml.schemas": {
-    "https://raw.githubusercontent.com/aws/aws-sam-cli/master/samcli/resources/schema/cfn_schema/schema.json": "infra/cloudformation/*.yaml"
+    "https://json.schemastore.org/cloudformation.template.json": "infra/cloudformation/*.yaml"
   },
+  "yaml.validate": true,
   "files.associations": {
     "infra/cloudformation/*.yaml": "yaml"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
   }
 }
