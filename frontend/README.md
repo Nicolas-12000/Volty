@@ -1,5 +1,7 @@
 # Volty frontend
 
+Despliegue (S3/CloudFront + `NEXT_PUBLIC_API_URL`): [`docs/DEPLOY.md`](../docs/DEPLOY.md).
+
 ## Mapa de pantallas
 
 | Ruta | Quién | API |

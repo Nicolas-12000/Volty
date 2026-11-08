@@ -1,6 +1,6 @@
 # Volty — backend
 
-API FastAPI para precios (Energy-Charts), interpretación NL y optimización de cargas.
+API FastAPI para precios (Energy-Charts), interpretación NL y optimización de cargas. Despliegue AWS: [`docs/DEPLOY.md`](../docs/DEPLOY.md).
 
 ## Entorno Python (obligatorio: venv local)
 
