@@ -18,6 +18,38 @@ class ApiCacheEntry(Base):
     stored_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
+class UserAccount(Base):
+    __tablename__ = "user_accounts"
+
+    email: Mapped[str] = mapped_column(String(320), primary_key=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
+class MatiasThread(Base):
+    """Hilos de chat MATIAS por usuario (mensajes + borrador en JSONB)."""
+
+    __tablename__ = "matias_threads"
+
+    thread_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    owner_email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(200), nullable=False, default="Nueva conversación")
+    messages: Mapped[list] = mapped_column(JSONB, nullable=False, server_default="[]")
+    draft: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
 class IngestedSnapshot(Base):
     """Copia append-only de respuestas externas para análisis histórico."""
 
