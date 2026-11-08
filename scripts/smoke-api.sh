@@ -17,4 +17,16 @@ TOKEN=$(curl -fsS -X POST "$API/auth/login" \
 echo "GET $API/me/summary"
 curl -fsS "$API/me/summary" -H "Authorization: Bearer $TOKEN" | head -c 400
 echo
-echo "OK smoke"
+
+echo "GET $API/prices (DE-LU / Energy-Charts)"
+PRICES=$(curl -fsS "$API/prices")
+python3 -c "import json,sys; d=json.load(sys.stdin); print('zone',d.get('bidding_zone'),'points',len(d.get('points',[])))" <<<"$PRICES"
+
+echo "GET $API/renewable-share"
+curl -fsS "$API/renewable-share" | head -c 300
+echo
+
+echo "GET $API/smard/filters"
+curl -fsS "$API/smard/filters" | head -c 200
+echo
+echo "OK smoke (mercado DE)"
