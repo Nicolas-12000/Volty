@@ -1,19 +1,27 @@
-# Volty — frontend (Next.js + Relieve)
+# Volty frontend
 
-Generado con [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app). Identidad en [`DESING.MD`](./DESING.MD).
+## Mapa de pantallas
 
-## Desarrollo
+| Ruta | Quién | API |
+|------|--------|-----|
+| `/` | Todos | `prices`, `renewable-share`, `health` |
+| `/analytics` | Todos | `smard`, precios |
+| `/entrar` | Invitado | `auth/login` |
+| `/hogar` | Sesión | `me/summary` |
+| `/hogar/ajustes` | Sesión | `me/profile`, `me/password` |
+| `/matias` | Sesión | `chat/*` |
+| `/loads`, `/plan` | Sesión | `optimize` + storage local por email |
+
+## Dev
 
 ```bash
-cd frontend
 npm install
-npm run dev
+npm run dev   # :3000 → rewrite /api a 127.0.0.1:8000
 ```
 
-UI en [http://localhost:3000](http://localhost:3000). Las rutas `/api/*` se reescriben al backend FastAPI (`next.config.ts`, por defecto `http://127.0.0.1:8000`).
+## Producción (estático)
 
-Desde la raíz del repo: `make dev-frontend` (con el backend en `make dev-backend`).
-
-## Variables
-
-- `VOLTY_API_URL` — origen del API en build/runtime (opcional).
+```bash
+NEXT_PUBLIC_API_URL=https://tu-api.../api VOLTY_STATIC_EXPORT=1 npm run build
+# publicar frontend/out
+```
