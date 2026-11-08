@@ -1,0 +1,17 @@
+packages:
+  - .
+
+onlyBuiltDependencies:
+  - unrs-resolver
+
+allowBuilds:
+  unrs-resolver: true
+
+minimumReleaseAgeStrict: false
+
+minimumReleaseAgeExclude:
+  - "@next/env@16.4.0"
+  - "@next/eslint-plugin-next@16.4.0"
+  - "@next/swc-linux-x64-gnu@16.4.0"
+  - eslint-config-next@16.4.0
+  - next@16.4.0
