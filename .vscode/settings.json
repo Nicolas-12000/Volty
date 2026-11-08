@@ -1,0 +1,27 @@
+{
+  "yaml.customTags": [
+    "!And",
+    "!Base64",
+    "!Cidr",
+    "!Equals",
+    "!FindInMap",
+    "!GetAtt",
+    "!GetAZs",
+    "!If",
+    "!ImportValue",
+    "!Join",
+    "!Not",
+    "!Or",
+    "!Ref",
+    "!Select",
+    "!Split",
+    "!Sub",
+    "!Transform"
+  ],
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/aws/aws-sam-cli/master/samcli/resources/schema/cfn_schema/schema.json": "infra/cloudformation/*.yaml"
+  },
+  "files.associations": {
+    "infra/cloudformation/*.yaml": "yaml"
+  }
+}
