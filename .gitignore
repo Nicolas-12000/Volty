@@ -4,9 +4,12 @@ __pycache__/
 venv/
 backend/.venv/
 .env
-.env.local
-frontend/.env.local
+.env.*
+!.env.example
+!**/.env.example
 backend/.env
+frontend/.env
+frontend/.env.local
 *.egg-info/
 .pytest_cache/
 .mypy_cache/
@@ -22,5 +25,9 @@ infra/terraform/*.tfstate
 infra/terraform/*.tfstate.*
 infra/terraform/terraform.tfvars
 infra/cloudformation/params.json
+infra/cloudformation/params.*.json
+!infra/cloudformation/params.example.json
+# Artefacto pip accidental (ej. backend/=2.9.0)
+backend/=*
 .DS_Store
-VOLTY.md 
+VOLTY.md
