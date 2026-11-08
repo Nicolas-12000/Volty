@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Objective(str, Enum):
@@ -97,3 +97,108 @@ class ParsedIntent(BaseModel):
     preferences: OptimizationPreferences
     explanation: str
     confidence: Literal["rule_based", "llm"] = "rule_based"
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(min_length=1)
+
+
+class MatiasChatRequest(BaseModel):
+    thread_id: str | None = None
+    message: str | None = None
+    messages: list[ChatMessage] | None = None
+    context_load_name: str | None = None
+    draft: ParsedIntent | None = None
+
+    @model_validator(mode="after")
+    def _require_turn_input(self) -> "MatiasChatRequest":
+        if self.message and self.message.strip():
+            return self
+        if self.messages and len(self.messages) >= 1:
+            return self
+        if self.draft is not None and self.thread_id:
+            return self
+        raise ValueError("Indica message, messages o draft+thread_id.")
+
+
+class MatiasAction(BaseModel):
+    type: Literal["apply_loads", "open_loads", "run_plan"]
+    label: str
+
+
+class MatiasChatResponse(BaseModel):
+    thread_id: str
+    reply: str
+    messages: list[ChatMessage] = Field(default_factory=list)
+    intent: ParsedIntent | None = None
+    draft: ParsedIntent | None = None
+    actions: list[MatiasAction] = Field(default_factory=list)
+    assistant: str = "MATIAS"
+    backend: str = "rules"
+    rag_used: bool = False
+
+
+class MatiasThreadSummary(BaseModel):
+    thread_id: str
+    title: str
+    updated_at: datetime | None = None
+    message_count: int = 0
+    has_draft: bool = False
+
+
+class MatiasThreadListResponse(BaseModel):
+    threads: list[MatiasThreadSummary] = Field(default_factory=list)
+
+
+class MatiasThreadResponse(BaseModel):
+    thread_id: str
+    title: str = "Nueva conversación"
+    messages: list[ChatMessage]
+    draft: ParsedIntent | None = None
+
+
+class UserOut(BaseModel):
+    email: str
+    name: str
+    assistant: str = "MATIAS"
+
+
+class ProfilePatchRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=120)
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8, max_length=128)
+    new_password_confirm: str = Field(min_length=8, max_length=128)
+
+
+class ServerContextOut(BaseModel):
+    """Contexto de mercado/optimización — solo lectura para el cliente."""
+
+    bidding_zone: str
+    timezone: str
+    assistant: str
+    note: str
+
+
+class MatiasAccountSummary(BaseModel):
+    thread_id: str
+    title: str
+    updated_at: datetime | None = None
+    message_count: int = 0
+    has_draft: bool = False
+
+
+class MeMatiasBlock(BaseModel):
+    thread_count: int
+    threads_with_draft: int
+    recent_threads: list[MatiasAccountSummary] = Field(default_factory=list)
+
+
+class MeSummaryResponse(BaseModel):
+    user: UserOut
+    matias: MeMatiasBlock
+    server: ServerContextOut
+    can_change_password: bool
