@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timezone
 from typing import Any
 
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
 from volty.core.db.models import ApiCacheEntry, IngestedSnapshot
@@ -27,7 +28,7 @@ class PostgresCacheStore:
                 return None
             return row.payload
 
-    def set(self, key: str, data: Any) -> None:
+    def set(self, key: str, data: Any, *, record_snapshot: bool = True) -> None:
         now = datetime.now(timezone.utc)
         with get_session_factory()() as session:
             stmt = insert(ApiCacheEntry).values(cache_key=key, payload=data, stored_at=now)
@@ -36,12 +37,20 @@ class PostgresCacheStore:
                 set_={"payload": data, "stored_at": now},
             )
             session.execute(stmt)
-            session.add(
-                IngestedSnapshot(
-                    source=self.source,
-                    cache_key=key,
-                    payload=data,
-                    fetched_at=now,
-                )
-            )
+            if record_snapshot:
+                latest = session.execute(
+                    select(IngestedSnapshot)
+                    .where(IngestedSnapshot.cache_key == key)
+                    .order_by(IngestedSnapshot.fetched_at.desc())
+                    .limit(1)
+                ).scalar_one_or_none()
+                if latest is None or latest.payload != data:
+                    session.add(
+                        IngestedSnapshot(
+                            source=self.source,
+                            cache_key=key,
+                            payload=data,
+                            fetched_at=now,
+                        )
+                    )
             session.commit()
