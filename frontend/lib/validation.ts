@@ -1,13 +1,17 @@
 export function validateLoadFeasibility(
   energyKwh: number,
   maxPowerKw: number,
-  deadlineIso: string,
-  windowStart: Date = new Date(),
+  deadlineLocalOrIso: string,
+  windowStart?: Date,
 ): string | null {
-  const deadline = new Date(deadlineIso);
+  if (!deadlineLocalOrIso?.trim()) {
+    return "Indica una hora límite válida (hora de Berlín).";
+  }
+  const deadline = new Date(deadlineLocalOrIso);
   if (Number.isNaN(deadline.getTime())) {
     return "Indica una hora límite válida (hora de Berlín).";
   }
+  if (!windowStart) return null;
   const hours = (deadline.getTime() - windowStart.getTime()) / 3_600_000;
   if (hours <= 0) {
     return "La hora límite debe ser posterior a ahora.";
