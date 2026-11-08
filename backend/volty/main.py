@@ -1,14 +1,25 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from volty import __version__
-from volty.api.routes import router
+from volty.api.router import api_router
+from volty.application.account import ensure_demo_user_seeded
 from volty.config import settings
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    ensure_demo_user_seeded()
+    yield
+
 
 app = FastAPI(
     title="Volty API",
     description="Planificación y optimización de consumo eléctrico",
     version=__version__,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -19,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router, prefix="/api")
+app.include_router(api_router, prefix="/api")
 
 
 @app.get("/")
