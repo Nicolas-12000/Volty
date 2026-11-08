@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Front Volty — S3 privado + CloudFront OAC (sin bucket público).
+Description: Front Volty - S3 privado + CloudFront OAC.
 
 Parameters:
   ProjectName:

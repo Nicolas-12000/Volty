@@ -1,10 +1,9 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Volty ahorro — Lambda pública sin VPC ni RDS (~0 USD fijo; free tier).
+Description: Volty ahorro - Lambda sin VPC ni RDS (coste fijo ~0).
 
 Metadata:
   com.aws.cloudformation.Context:
-    arch:
-      flow: Internet > Lambda Function URL > ApiFunction (sin VPC, hilos MATIAS en memoria)
+    arch: "Internet > Lambda Function URL > ApiFunction sin VPC; MATIAS en memoria"
 
 Parameters:
   ProjectName:
@@ -75,9 +74,9 @@ Resources:
         AllowMethods:
           - DELETE
           - GET
-          - OPTIONS
           - PATCH
           - POST
+          - "*"
         AllowHeaders:
           - authorization
           - content-type

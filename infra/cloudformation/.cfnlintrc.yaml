@@ -1,0 +1,5 @@
+---
+# Contexto I4010 y guardrails enterprise (NAT, Function URL publica) no aplican al MVP Volty.
+ignore_checks:
+  - I4010
+  - W3005

@@ -2,10 +2,11 @@
 
 | Plantilla | Uso |
 |-----------|-----|
-| **`volty-free.yaml`** | **Ahorro / free tier**: Lambda sin VPC ni RDS |
-| **`volty-secure.yaml`** | Producción: VPC privada, RDS, migraciones |
-| **`volty-cdn.yaml`** | Front: S3 privado + CloudFront OAC |
+| **`volty-student.yaml`** | **Por defecto:** RDS + Lambda sin NAT |
+| `volty-free.yaml` | Sin RDS, MATIAS en memoria |
+| `volty-secure.yaml` | Prod: VPC privada + NAT |
+| `volty-cdn.yaml` | S3 privado + CloudFront (front) |
 
-Scripts: `deploy-aws-free.sh` (ahorro) · `deploy-aws-full.sh` (prod). Ver `docs/AWS_MODO_AHORRO.md`.
+Parámetros: copia `params.example.json` → `params.json` (gitignored).
 
-Los tags `!Ref`, `!Sub`, etc. son válidos en CloudFormation; el editor los reconoce con `.vscode/settings.json`. **cfn-guard** puede avisar de acceso público a la Function URL — es intencional hasta API Gateway/WAF.
+Despliegue y checklist: **[`docs/DEPLOY.md`](../../docs/DEPLOY.md)**.

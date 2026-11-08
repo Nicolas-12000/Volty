@@ -1,10 +1,9 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Volty seguro — VPC dedicada, RDS privado, Lambda en subnets privadas, NAT solo salida HTTPS.
+Description: Volty seguro - VPC dedicada, RDS privado, Lambda en subnets privadas, NAT salida HTTPS.
 
 Metadata:
   com.aws.cloudformation.Context:
-    arch:
-      flow: Internet > Lambda Function URL > ApiFunction (VPC privada) > RDS privado; egress 443 vía NAT
+    arch: "Internet > Lambda URL > ApiFunction en VPC privada > RDS; egress Gemini vía NAT"
 
 Parameters:
   ProjectName:
@@ -143,7 +142,7 @@ Resources:
   LambdaSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Lambda Volty — salida HTTPS vía NAT
+      GroupDescription: Lambda Volty egress HTTPS via NAT
       VpcId: !Ref Vpc
       SecurityGroupEgress:
         - IpProtocol: tcp
@@ -155,7 +154,7 @@ Resources:
   DbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: RDS Volty — solo Lambda
+      GroupDescription: RDS Volty from Lambda SG only
       VpcId: !Ref Vpc
 
   LambdaEgressToRds:
@@ -186,6 +185,8 @@ Resources:
 
   DbSecret:
     Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
       Description: Credencial Postgres Volty
       GenerateSecretString:
@@ -197,10 +198,10 @@ Resources:
   Database:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
     Properties:
       DBInstanceIdentifier: !Sub "${ProjectName}-postgres"
       Engine: postgres
-      EngineVersion: "16.6"
       AutoMinorVersionUpgrade: true
       DBInstanceClass: db.t4g.micro
       AllocatedStorage: 20
@@ -309,9 +310,9 @@ Resources:
         AllowMethods:
           - DELETE
           - GET
-          - OPTIONS
           - PATCH
           - POST
+          - "*"
         AllowHeaders:
           - authorization
           - content-type
