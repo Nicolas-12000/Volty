@@ -19,8 +19,11 @@ Desde la raíz del repo: `make db-up && make db-migrate` (PostgreSQL en Docker).
 
 ```env
 DATABASE_URL=postgresql+psycopg://volty:volty@127.0.0.1:5432/volty
-OPENAI_API_KEY=
+GEMINI_API_KEY=
+MATIAS_THREAD_STORE=auto
 ```
+
+Con BD y `alembic upgrade head`, los hilos MATIAS persisten en `matias_threads`. Sin BD, `auto` usa memoria.
 
 ## Ejecutar
 
