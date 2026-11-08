@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Volty ahorro — Lambda pública sin VPC ni RDS (~0 USD fijo; free tier).
+
+Metadata:
+  com.aws.cloudformation.Context:
+    arch:
+      flow: Internet > Lambda Function URL > ApiFunction (sin VPC, hilos MATIAS en memoria)
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: volty
+  ArtifactsBucket:
+    Type: String
+  ApiObjectKey:
+    Type: String
+    Default: releases/api.zip
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+  GeminiApiKey:
+    Type: String
+    NoEcho: true
+    Default: ""
+  CorsOrigins:
+    Type: CommaDelimitedList
+    Default: "http://localhost:3000"
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-free-lambda"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  ApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${ProjectName}-api-free"
+      Runtime: python3.12
+      Handler: handler.lambda_handler
+      Timeout: 29
+      MemorySize: 512
+      Role: !GetAtt LambdaRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactsBucket
+        S3Key: !Ref ApiObjectKey
+      Environment:
+        Variables:
+          JWT_SECRET: !Ref JwtSecret
+          GEMINI_API_KEY: !Ref GeminiApiKey
+          MATIAS_THREAD_STORE: memory
+          MATIAS_BACKEND: gemini
+          CORS_ORIGINS: !Join [",", !Ref CorsOrigins]
+          DEMO_USER_EMAIL: demo@volty.dev
+          DEMO_USER_PASSWORD: valle-0700
+          DEMO_USER_NAME: Hogar demo
+
+  FunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !Ref ApiFunction
+      AuthType: NONE
+      Cors:
+        AllowOrigins: !Ref CorsOrigins
+        AllowMethods:
+          - DELETE
+          - GET
+          - OPTIONS
+          - PATCH
+          - POST
+        AllowHeaders:
+          - authorization
+          - content-type
+        MaxAge: 3600
+
+  FunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  ApiBaseUrl:
+    Description: URL base sin /api
+    Value: !GetAtt FunctionUrl.FunctionUrl
+  StackMode:
+    Description: Modo de coste
+    Value: free-no-vpc-no-rds
