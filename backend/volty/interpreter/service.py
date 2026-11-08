@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import json
 import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-import httpx
-
 from volty.core.config import settings
 from volty.core.schemas import LoadSpec, NaturalLanguageRequest, Objective, OptimizationPreferences, ParsedIntent
+from volty.gemini.intent import parse_intent_with_gemini
 
 
 def parse_natural_language(request: NaturalLanguageRequest) -> ParsedIntent:
@@ -16,9 +14,9 @@ def parse_natural_language(request: NaturalLanguageRequest) -> ParsedIntent:
     if not text:
         raise ValueError("Mensaje vacío.")
 
-    llm_result = _try_openai_parse(request.message)
-    if llm_result:
-        return llm_result
+    gemini = parse_intent_with_gemini(request.message)
+    if gemini:
+        return gemini
 
     return _rule_based_parse(text, request.context_load_name)
 
@@ -72,9 +70,21 @@ def _rule_based_parse(text: str, default_name: str | None) -> ParsedIntent:
 
 
 def _parse_deadline(text: str, now: datetime, tz: ZoneInfo) -> datetime:
-    match = re.search(r"(?:antes de las|para las|a las|before)?\s*(\d{1,2})(?::(\d{2}))?\s*(?:de la mañana|am|a\.m\.)?", text)
-    if not match and "mañana" in text:
-        match = re.search(r"(\d{1,2})(?::(\d{2}))?", text)
+    scrubbed = re.sub(r"\d+(?:[.,]\d+)?\s*kwh", " ", text, flags=re.I)
+    scrubbed = re.sub(r"\d+(?:[.,]\d+)?\s*kw\b", " ", scrubbed, flags=re.I)
+    match = re.search(
+        r"(?:antes de las|para las|a las|before)\s*(\d{1,2})(?::(\d{2}))?\s*(?:de la mañana|am|a\.m\.)?",
+        scrubbed,
+        flags=re.I,
+    )
+    if not match:
+        match = re.search(
+            r"(?:antes de las|para las|a las|before)?\s*(\d{1,2})(?::(\d{2}))?\s*(?:de la mañana|am|a\.m\.)?",
+            scrubbed,
+            flags=re.I,
+        )
+    if not match and "mañana" in scrubbed:
+        match = re.search(r"(\d{1,2})(?::(\d{2}))?", scrubbed)
     hour = int(match.group(1)) if match else 7
     minute = int(match.group(2) or 0)
     if match and ("tarde" in text or "pm" in text or "p.m." in text) and hour < 12:
@@ -86,72 +96,3 @@ def _parse_deadline(text: str, now: datetime, tz: ZoneInfo) -> datetime:
     if deadline <= now:
         deadline += timedelta(days=1)
     return deadline
-
-
-def _try_openai_parse(message: str) -> ParsedIntent | None:
-    if not settings.openai_api_key:
-        return None
-
-    schema = {
-        "type": "object",
-        "properties": {
-            "loads": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "id": {"type": "string"},
-                        "name": {"type": "string"},
-                        "energy_kwh": {"type": "number"},
-                        "max_power_kw": {"type": "number"},
-                        "window_start": {"type": ["string", "null"]},
-                        "deadline": {"type": "string"},
-                        "must_run": {"type": "boolean"},
-                    },
-                    "required": ["name", "energy_kwh", "deadline"],
-                },
-            },
-            "preferences": {
-                "type": "object",
-                "properties": {
-                    "objective": {"type": "string", "enum": ["minimize_cost", "balance_cost_renewables"]},
-                    "renewable_weight": {"type": "number"},
-                },
-            },
-            "explanation": {"type": "string"},
-        },
-        "required": ["loads", "preferences", "explanation"],
-    }
-
-    system = (
-        "Conviertes peticiones en español sobre cargas eléctricas en JSON estructurado. "
-        f"Zona horaria: {settings.timezone}. Fechas ISO 8601 con offset."
-    )
-    payload = {
-        "model": "gpt-4o-mini",
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": message},
-        ],
-        "response_format": {
-            "type": "json_schema",
-            "json_schema": {"name": "volty_intent", "schema": schema},
-        },
-    }
-    headers = {"Authorization": f"Bearer {settings.openai_api_key}"}
-    try:
-        with httpx.Client(timeout=30.0) as client:
-            resp = client.post("https://api.openai.com/v1/chat/completions", json=payload, headers=headers)
-            resp.raise_for_status()
-            content = resp.json()["choices"][0]["message"]["content"]
-        data = json.loads(content)
-        loads = [LoadSpec.model_validate(item) for item in data["loads"]]
-        prefs = OptimizationPreferences.model_validate(data.get("preferences", {}))
-        return ParsedIntent(
-            loads=loads,
-            preferences=prefs,
-            explanation=data.get("explanation", "Interpretado con IA."),
-            confidence="llm",
-        )
-    except Exception:
-        return None
