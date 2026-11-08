@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: volty
+          POSTGRES_PASSWORD: volty
+          POSTGRES_DB: volty
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U volty"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Backend deps
+        run: |
+          cd backend
+          python -m venv .venv
+          .venv/bin/pip install -r requirements-dev.txt
+      - name: Pytest
+        env:
+          DATABASE_URL: postgresql+psycopg://volty:volty@127.0.0.1:5432/volty
+        run: cd backend && .venv/bin/pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: cd frontend && npm ci && npx tsc --noEmit
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=infra/terraform init -backend=false && terraform validate
