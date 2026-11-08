@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "JwtSecret",
+    "ParameterValue": "CAMBIA-minimo-32-caracteres-aleatorio-openssl-rand-hex-32"
+  },
+  {
+    "ParameterKey": "GeminiApiKey",
+    "ParameterValue": ""
+  },
+  {
+    "ParameterKey": "CorsOrigins",
+    "ParameterValue": "http://localhost:3000,http://127.0.0.1:3000,https://TU-CLOUDFRONT.cloudfront.net"
+  },
+  {
+    "ParameterKey": "ArtifactsBucket",
+    "ParameterValue": "volty-artifacts-TU_ACCOUNT_ID"
+  }
+]
