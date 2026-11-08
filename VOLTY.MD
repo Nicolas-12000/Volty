@@ -116,7 +116,7 @@ La IA no sustituye al optimizador: traduce intención del usuario → parámetro
 | Mercado DE-LU, intervalos 15 min | Hecho | Energy-Charts `/v2/price` |
 | Ingesta + caché de precios | Hecho | Energy-Charts; caché TTL en PostgreSQL |
 | Optimizador LP + baselines | Hecho | ASAP y uniforme; multi-carga independiente |
-| API interpret NL | Hecho | Reglas ES + OpenAI opcional |
+| API interpret NL | Hecho | Reglas ES + Gemini opcional |
 | UI planificación | Hecho | Relieve (`DESING.md`) — Tailwind v4, franja, chips IA |
 | SMARD (series mercado) | Hecho | `GET /api/smard/series` |
 | Histórico persistente (BD) | Hecho | PostgreSQL (`docker compose`) + `ingested_snapshots` |
@@ -308,11 +308,11 @@ Logging estructurado recomendado: `requestId`, operación, duración, status, `e
 
 ## 54. Refactorización respecto al repo actual
 
-Hoy el MVP es un **monolito FastAPI** (`uvicorn`, un proceso, todas las rutas en `backend/volty/api/routes.py`). Eso acelera desarrollo local; **no** es la forma objetivo de producción.
+Hoy el MVP es un **monolito modular FastAPI** (`uvicorn`, un proceso, routers delgados en `backend/volty/api/` + casos de uso en `application/`). Eso acelera desarrollo local; **no** es la forma objetivo de producción.
 
 | Hoy | Objetivo |
 |-----|----------|
-| Un solo `main.py` + `routes.py` | Cuatro handlers Lambda + API Gateway |
+| Un solo `main.py` + `api/router.py` | Cuatro handlers Lambda + API Gateway |
 | Ingesta en petición HTTP (`fetch_prices` cache miss) | Ingesta **solo** en `data-ingestion` + EventBridge; API lee RDS |
 | NL en proceso API (`nl_interpreter.py`) | Módulo compartido invocado desde **AI Lambda**; API solo orquesta |
 | Optimizer en proceso API | Paquete `volty.optimizer` en **Optimization Lambda** |

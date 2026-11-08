@@ -1,4 +1,4 @@
-.PHONY: help setup setup-backend setup-frontend test dev-backend dev-frontend clean-backend-venv db-up db-down db-migrate
+.PHONY: help setup setup-backend setup-frontend test dev-backend dev-frontend clean-backend-venv db-up db-down db-migrate ingest build-lambdas build-frontend-static deploy-preflight
 
 BACKEND := backend
 FRONTEND := frontend
@@ -14,6 +14,10 @@ help:
 	@echo "  make test             pytest (backend)"
 	@echo "  make dev-backend      API en :8000"
 	@echo "  make dev-frontend     UI en :3000 (rewrite /api → backend)"
+	@echo "  make ingest           Energy-Charts → PostgreSQL (idempotente)"
+	@echo "  make build-lambdas    zips en infra/build/"
+	@echo "  make build-frontend-static  out/ para S3/CloudFront"
+	@echo "  make deploy-preflight tests + lambdas + terraform validate"
 	@echo "  make clean-backend-venv  borra backend/.venv"
 
 setup: setup-backend setup-frontend
@@ -39,10 +43,23 @@ test:
 	cd $(BACKEND) && $(VENV)/pytest -q
 
 dev-backend:
-	cd $(BACKEND) && $(VENV)/uvicorn volty.main:app --reload --host 127.0.0.1 --port 8000
+	cd $(BACKEND) && ./.venv/bin/uvicorn volty.main:app --reload --host 127.0.0.1 --port 8000
 
 dev-frontend:
 	cd $(FRONTEND) && npm run dev
+
+ingest:
+	cd $(BACKEND) && $(VENV)/python -m volty.ingestion.job
+
+build-lambdas:
+	chmod +x scripts/build-lambdas.sh && ./scripts/build-lambdas.sh
+
+build-frontend-static:
+	cd $(FRONTEND) && VOLTY_STATIC_EXPORT=1 npm run build
+
+deploy-preflight: test build-lambdas
+	terraform -chdir=infra/terraform init -backend=false
+	terraform -chdir=infra/terraform validate
 
 clean-backend-venv:
 	rm -rf $(BACKEND)/.venv

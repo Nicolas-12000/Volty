@@ -53,7 +53,7 @@ git status          # revisar que no entren secretos ni .venv
 
 `backend/.env` (no commitear):
 
-- `OPENAI_API_KEY` — interpretación NL con LLM; sin clave, reglas en español.
+- `GEMINI_API_KEY` — MATIAS e interpretación NL; sin clave, reglas en español.
 
 ## Licencia / datos externos
 
