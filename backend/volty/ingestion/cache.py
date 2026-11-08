@@ -19,38 +19,44 @@ class PostgresCacheStore:
         self.source = source
 
     def get(self, key: str) -> Any | None:
-        with get_session_factory()() as session:
-            row = session.get(ApiCacheEntry, key)
-            if row is None:
-                return None
-            age = time.time() - row.stored_at.timestamp()
-            if age > self.ttl_seconds:
-                return None
-            return row.payload
+        try:
+            with get_session_factory()() as session:
+                row = session.get(ApiCacheEntry, key)
+                if row is None:
+                    return None
+                age = time.time() - row.stored_at.timestamp()
+                if age > self.ttl_seconds:
+                    return None
+                return row.payload
+        except Exception:
+            return None
 
     def set(self, key: str, data: Any, *, record_snapshot: bool = True) -> None:
         now = datetime.now(timezone.utc)
-        with get_session_factory()() as session:
-            stmt = insert(ApiCacheEntry).values(cache_key=key, payload=data, stored_at=now)
-            stmt = stmt.on_conflict_do_update(
-                index_elements=[ApiCacheEntry.cache_key],
-                set_={"payload": data, "stored_at": now},
-            )
-            session.execute(stmt)
-            if record_snapshot:
-                latest = session.execute(
-                    select(IngestedSnapshot)
-                    .where(IngestedSnapshot.cache_key == key)
-                    .order_by(IngestedSnapshot.fetched_at.desc())
-                    .limit(1)
-                ).scalar_one_or_none()
-                if latest is None or latest.payload != data:
-                    session.add(
-                        IngestedSnapshot(
-                            source=self.source,
-                            cache_key=key,
-                            payload=data,
-                            fetched_at=now,
+        try:
+            with get_session_factory()() as session:
+                stmt = insert(ApiCacheEntry).values(cache_key=key, payload=data, stored_at=now)
+                stmt = stmt.on_conflict_do_update(
+                    index_elements=[ApiCacheEntry.cache_key],
+                    set_={"payload": data, "stored_at": now},
+                )
+                session.execute(stmt)
+                if record_snapshot:
+                    latest = session.execute(
+                        select(IngestedSnapshot)
+                        .where(IngestedSnapshot.cache_key == key)
+                        .order_by(IngestedSnapshot.fetched_at.desc())
+                        .limit(1)
+                    ).scalar_one_or_none()
+                    if latest is None or latest.payload != data:
+                        session.add(
+                            IngestedSnapshot(
+                                source=self.source,
+                                cache_key=key,
+                                payload=data,
+                                fetched_at=now,
+                            )
                         )
-                    )
-            session.commit()
+                session.commit()
+        except Exception:
+            return
