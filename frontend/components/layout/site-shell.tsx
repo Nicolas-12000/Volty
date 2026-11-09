@@ -25,7 +25,7 @@ export function SiteShell({
   return (
     <div className="min-h-dvh bg-canvas text-ink antialiased">
       <SiteHeader />
-      <main className={cn("mx-auto max-w-[1180px] px-5 pb-16 pt-8 md:pb-20 md:pt-10", className)}>
+      <main className={cn("mx-auto max-w-295 px-5 pb-16 pt-8 md:pb-20 md:pt-10", className)}>
         {showHeading && title ? (
           <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
             <div>

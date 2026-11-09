@@ -56,7 +56,7 @@ export function AuthCard({
 
   return (
     <div className="flex min-h-dvh flex-col bg-canvas">
-      <header className="mx-auto flex h-14 w-full max-w-[1180px] items-center justify-between px-5">
+      <header className="mx-auto flex h-14 w-full max-w-295 items-center justify-between px-5">
         <Link href="/" className="flex items-center gap-2 text-[16px] font-semibold tracking-[-0.4px]">
           <VoltyMark size={28} clipId="vm-clip-auth" />
           Volty

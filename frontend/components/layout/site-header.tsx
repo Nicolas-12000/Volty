@@ -21,7 +21,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b border-hairline bg-canvas/90 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-[1180px] items-center gap-3 px-5 md:gap-8">
+      <div className="mx-auto flex h-14 max-w-295 items-center gap-3 px-5 md:gap-8">
         <Link href="/" className="flex shrink-0 items-center gap-2 text-[16px] font-semibold tracking-[-0.4px]">
           <VoltyMark size={28} clipId="vm-clip-header" />
           Volty

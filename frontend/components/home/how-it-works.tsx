@@ -6,12 +6,12 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="analitica" className="mx-auto max-w-[1180px] px-5 pb-16 md:pb-20">
+    <section id="analitica" className="mx-auto max-w-295 px-5 pb-16 md:pb-20">
       <div className="grid border-t border-hairline md:grid-cols-3">
         {STEPS.map(([title, detail], i) => (
           <div key={title} className={`py-8 ${i === 0 ? "md:pr-8" : "md:border-l md:border-hairline md:px-8"}`}>
             <h3 className="text-lg font-medium tracking-[-0.3px]">{title}</h3>
-            <p className="mt-2 max-w-[320px] text-[15px] leading-relaxed text-ink-muted">{detail}</p>
+            <p className="mt-2 max-w-80 text-[15px] leading-relaxed text-ink-muted">{detail}</p>
           </div>
         ))}
       </div>

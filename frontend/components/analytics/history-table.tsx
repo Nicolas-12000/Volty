@@ -19,7 +19,7 @@ export function HistoryTable({ entries }: HistoryTableProps) {
 
   return (
     <div className="overflow-x-auto rounded-2xl border border-hairline bg-surface-1">
-      <table className="w-full min-w-[36rem] text-left">
+      <table className="w-full min-w-xl text-left">
         <thead className="border-b border-hairline bg-canvas text-[11px] font-semibold uppercase tracking-wide text-ink-dimmed">
           <tr>
             <th className="px-5 py-3">Cuándo</th>

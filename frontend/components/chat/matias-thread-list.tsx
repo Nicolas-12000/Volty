@@ -21,7 +21,7 @@ export function MatiasThreadList({
   loading,
 }: MatiasThreadListProps) {
   return (
-    <aside className="flex max-h-[20rem] flex-col rounded-2xl border border-hairline bg-surface-1 lg:max-h-none">
+    <aside className="flex max-h-80 flex-col rounded-2xl border border-hairline bg-surface-1 lg:max-h-none">
       <div className="flex items-center justify-between border-b border-hairline px-3 py-3">
         <p className="text-[13px] text-ink-muted">Tus chats</p>
         <button

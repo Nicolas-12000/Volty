@@ -22,7 +22,7 @@ export function DashboardKpiSkeleton() {
             <SkeletonMetric className="h-7 w-20" />
             <Skeleton className="h-3 w-16" />
           </div>
-          <Skeleton className="h-6 w-[4.5rem] shrink-0 rounded-sm" />
+          <Skeleton className="h-6 w-18 shrink-0 rounded-sm" />
         </div>
       ))}
     </>

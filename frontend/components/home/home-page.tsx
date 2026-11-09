@@ -18,7 +18,7 @@ export function HomePage() {
       <SiteHeader />
       <main>
         <Hero />
-        <section className="mx-auto max-w-[1180px] px-5">
+        <section className="mx-auto max-w-295 px-5">
           <Dashboard />
           <p className="mt-4 text-xs text-ink-dimmed">
             {signedIn
@@ -28,14 +28,14 @@ export function HomePage() {
         </section>
         <section
           id="matias"
-          className="mx-auto grid max-w-[1180px] items-start gap-8 px-5 py-16 md:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-12"
+          className="mx-auto grid max-w-295 items-start gap-8 px-5 py-16 md:py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-12"
         >
           <div>
             <div className="mb-5 inline-flex rounded-2xl border border-hairline bg-surface-1 p-2.5">
               <Matias size={64} />
             </div>
             <h2 className="type-display-xl">Háblale a MATIAS como hablarías con una persona.</h2>
-            <p className="mt-4 max-w-[440px] text-[17px] leading-relaxed text-ink-muted">
+            <p className="mt-4 max-w-110 text-[17px] leading-relaxed text-ink-muted">
               MATIAS entiende tu mensaje y lo convierte en condiciones claras. El horario final lo calcula el
               optimizador con precios reales, así que siempre puedes comprobarlo.
             </p>

@@ -31,7 +31,7 @@ tabulares. Cuerpo 15px. Botones 14px.
 ## Layout
 
 Mobile-first. Barra superior sticky (logo, enlaces, Entrar, Crear mi plan).
-Contenedor `max-w-[1180px]`. Home: Hero, Dashboard de mercado, chat MATIAS,
+Contenedor `max-w-295` (1180px). Home: Hero, Dashboard de mercado, chat MATIAS,
 cómo funciona. Resto de páginas: SiteShell con el mismo header/footer.
 Sin sidebar ni bottom-nav.
 

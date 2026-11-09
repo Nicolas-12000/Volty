@@ -8,8 +8,8 @@ export function Hero() {
   const signedIn = status === "authenticated";
 
   return (
-    <section className="mx-auto max-w-[1180px] px-5 pb-8 pt-10 md:pb-10 md:pt-16">
-      <h1 className="type-hero max-w-[960px]">
+    <section className="mx-auto max-w-295 px-5 pb-8 pt-10 md:pb-10 md:pt-16">
+      <h1 className="type-hero max-w-240">
         Precios reales para decidir cuándo consumir.{" "}
         <span className="text-ink-dimmed">
           Dile a MATIAS qué necesitas y planifica tu hogar en los valles del mercado.
