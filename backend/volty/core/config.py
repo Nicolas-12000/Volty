@@ -1,6 +1,9 @@
+import json
 from pathlib import Path
+from typing import Annotated
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import field_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -21,12 +24,22 @@ class Settings(BaseSettings):
     demo_user_email: str = "demo@volty.dev"
     demo_user_password: str = "valle-0700"
     demo_user_name: str = "Hogar demo"
-    cors_origins: list[str] = [
+    cors_origins: Annotated[list[str], NoDecode] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, value: object) -> object:
+        if isinstance(value, str):
+            raw = value.strip()
+            if raw.startswith("["):
+                return json.loads(raw)
+            return [part.strip() for part in raw.split(",") if part.strip()]
+        return value
 
     @property
     def cache_dir(self) -> Path:

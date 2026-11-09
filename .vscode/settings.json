@@ -18,16 +18,18 @@
     "!Sub scalar",
     "!Transform scalar"
   ],
-  "yaml.schemas": {
-    "": [
-      "infra/cloudformation/**/*.yaml",
-      "infra/cloudformation/**/*.yml"
-    ]
-  },
+  "yaml.schemas": {},
   "yaml.schemaStore.enable": false,
   "yaml.validate": true,
   "files.associations": {
     "infra/cloudformation/*.yaml": "yaml",
     "infra/cloudformation/*.yml": "yaml"
+  },
+  "[yaml]": {
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    }
   }
 }

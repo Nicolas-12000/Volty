@@ -245,6 +245,14 @@ Resources:
       Principal: "*"
       FunctionUrlAuthType: NONE
 
+  FunctionUrlInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ApiFunction
+      Action: lambda:InvokeFunction
+      Principal: "*"
+      InvokedViaFunctionUrl: true
+
 Outputs:
   ApiBaseUrl:
     Description: URL base Function URL (añadir /api en el front)
