@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     "Dile a MATIAS qué necesitas y planifica tu hogar en los valles del mercado. Precios day-ahead DE-LU cada 15 minutos.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/volty-mark.svg",
     apple: "/volty-mark.svg",
   },
   openGraph: {

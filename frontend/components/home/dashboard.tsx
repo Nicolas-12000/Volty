@@ -20,7 +20,6 @@ import { berlinNowSlot, localPlan, slotLabel } from "@/lib/market-demo";
 import { berlinDayKey, formatBerlinTime } from "@/lib/format";
 import { loginHref } from "@/lib/access";
 import { cn } from "@/lib/cn";
-import { Matias } from "@/components/brand/poodle";
 
 type DayTab = 0 | 1;
 
@@ -33,7 +32,6 @@ export function Dashboard() {
     todayPoints,
     tomorrowPoints,
     renewableDays,
-    renewableLoaded,
     loading,
     error,
     reload,
@@ -62,26 +60,20 @@ export function Dashboard() {
   const ns = nowSlot == null ? -1 : day === 0 ? Math.min(nowSlot, Math.max(prices.length - 1, 0)) : -1;
   const cur = hasPrices ? prices[day === 0 && ns >= 0 ? ns : 0] ?? 0 : 0;
 
-  const dayStamp = live[0]?.timestamp;
   const activeDayKey = day === 0 ? clock?.todayKey : clock?.tomorrowKey;
   const liveRenew = useMemo(() => {
-    if (activeDayKey != null && renewableDays[activeDayKey] != null) {
-      return renewableDays[activeDayKey];
-    }
-    if (dayStamp) {
-      const k = berlinDayKey(dayStamp);
-      if (renewableDays[k] != null) return renewableDays[k];
-    }
-    for (const p of live) {
-      const v = renewableDays[berlinDayKey(p.timestamp)];
-      if (v != null) return v;
-    }
-    return undefined;
-  }, [activeDayKey, renewableDays, dayStamp, live]);
-  const rn =
-    liveRenew != null && Number.isFinite(liveRenew) ? Math.round(liveRenew) : null;
+    if (!activeDayKey) return undefined;
+    if (renewableDays[activeDayKey] != null) return renewableDays[activeDayKey];
+    // Energy-Charts publica el promedio diario con un día de retraso.
+    if (day !== 0) return undefined;
+    const prior = Object.keys(renewableDays)
+      .filter((k) => k <= activeDayKey)
+      .sort()
+      .at(-1);
+    return prior != null ? renewableDays[prior] : undefined;
+  }, [activeDayKey, renewableDays, day]);
+  const rn = liveRenew != null && Number.isFinite(liveRenew) ? Math.round(liveRenew) : null;
   const renewPending = loading;
-  const renewMissing = !renewPending && renewableLoaded && rn == null && hasPrices;
 
   const minIdx = hasPrices ? prices.indexOf(mn) : -1;
   const maxIdx = hasPrices ? prices.indexOf(mx) : -1;
@@ -235,17 +227,7 @@ export function Dashboard() {
 
       <div id="hogar" className="grid border-t border-hairline lg:grid-cols-2">
         <div className="border-b border-hairline p-5 lg:border-b-0 lg:border-r">
-          <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/volty-mark.svg"
-              alt=""
-              width={40}
-              height={40}
-              className="hidden shrink-0 rounded-lg sm:block"
-            />
-            <h3 className="text-[15px] font-semibold tracking-[-0.2px] text-ink">Mix renovable</h3>
-          </div>
+          <h3 className="text-[15px] font-semibold tracking-[-0.2px] text-ink">Mix renovable</h3>
           {renewPending ? (
             <DashboardRenewableSkeleton />
           ) : rn != null ? (
@@ -253,26 +235,14 @@ export function Dashboard() {
               <div className="mt-4 flex h-2.5 overflow-hidden rounded-full bg-surface-3">
                 <i style={{ width: `${Math.min(100, Math.max(0, rn))}%` }} className="bg-accent-bright" />
               </div>
-              <p className="mt-3 text-sm text-ink-muted">{rn}% del mix eléctrico (promedio del día)</p>
+              <p className="mt-3 text-sm text-ink-muted">{rn}% del mix</p>
             </>
           ) : (
-            <div className="mt-4 flex items-start gap-4">
-              <Matias size={52} />
-              <div className="min-w-0 space-y-2">
-                <p className="text-sm text-ink-muted">
-                  {dayEmpty && day === 1
-                    ? "El mix renovable de mañana llega junto con los precios."
-                    : renewMissing
-                      ? "No llegó el dato de renovables. Suele ser la API o CORS; prueba de nuevo."
-                      : "Aún no hay dato de renovables para este día."}
-                </p>
-                {renewMissing ? (
-                  <Button type="button" variant="secondary" size="sm" onClick={() => reload()}>
-                    Reintentar
-                  </Button>
-                ) : null}
-              </div>
-            </div>
+            <p className="mt-3 text-sm text-ink-muted">
+              {dayEmpty && day === 1
+                ? "El mix renovable de mañana llega junto con los precios."
+                : "Hoy no tenemos el porcentaje de renovables."}
+            </p>
           )}
         </div>
         <div className="p-5">
