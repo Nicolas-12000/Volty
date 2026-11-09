@@ -1,59 +1,41 @@
 import { type HTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-/* ─── Types ────────────────────────────────────────────────────────────────── */
-
 type BadgeVariant = "success" | "warning" | "danger" | "neutral" | "accent";
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
-  /** Show a small coloured dot indicator before the label */
   dot?: boolean;
   children: ReactNode;
 }
 
-/* ─── Variant styles ───────────────────────────────────────────────────────── */
-
 const variantStyles: Record<BadgeVariant, string> = {
-  success: "bg-valley-deep-subtle text-valley-deep",
-  warning: "bg-hill-subtle text-hill",
-  danger: "bg-peak-subtle text-peak",
-  neutral: "bg-hairline text-ink-muted",
-  accent: "bg-accent-subtle text-accent",
+  success: "border-[#27a644]/40 text-leaf-bright",
+  warning: "border-hill/40 text-hill",
+  danger: "border-peak/40 text-peak",
+  neutral: "border-hairline text-ink-soft",
+  accent: "border-accent/40 text-accent-bright",
 };
 
 const dotColors: Record<BadgeVariant, string> = {
-  success: "bg-valley-deep",
+  success: "bg-leaf",
   warning: "bg-hill",
   danger: "bg-peak",
   neutral: "bg-ink-muted",
-  accent: "bg-accent",
+  accent: "bg-accent-bright",
 };
 
-/* ─── Component ────────────────────────────────────────────────────────────── */
-
-export function Badge({
-  variant = "neutral",
-  dot = false,
-  className,
-  children,
-  ...props
-}: BadgeProps) {
+export function Badge({ variant = "neutral", dot = false, className, children, ...props }: BadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-pill px-2.5 py-0.5 type-caption whitespace-nowrap",
+        "chip whitespace-nowrap",
         variantStyles[variant],
         className,
       )}
       {...props}
     >
-      {dot && (
-        <span
-          className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotColors[variant])}
-          aria-hidden="true"
-        />
-      )}
+      {dot ? <span className={cn("size-1.5 shrink-0 rounded-full", dotColors[variant])} aria-hidden="true" /> : null}
       {children}
     </span>
   );

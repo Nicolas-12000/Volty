@@ -3,31 +3,22 @@
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-/* ─── Types ────────────────────────────────────────────────────────────────── */
-
 interface ChipProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;
   children: ReactNode;
 }
 
-/* ─── Component ────────────────────────────────────────────────────────────── */
-
-export function Chip({
-  active = false,
-  className,
-  children,
-  ...props
-}: ChipProps) {
+export function Chip({ active = false, className, children, ...props }: ChipProps) {
   return (
     <button
       type="button"
       aria-pressed={active}
       className={cn(
-        "inline-flex cursor-pointer items-center justify-center rounded-pill border h-9 px-4 type-button-sm whitespace-nowrap",
-        "transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
+        "inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-full border px-3 py-1 text-sm font-medium transition-colors",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring",
         active
-          ? "bg-accent-subtle text-accent border-accent"
-          : "bg-transparent text-ink-muted border-hairline-strong hover:bg-surface-hover hover:text-ink",
+          ? "border-hairline bg-surface-3 text-ink"
+          : "border-hairline bg-transparent text-ink-muted hover:text-ink-soft",
         className,
       )}
       {...props}
@@ -35,4 +26,8 @@ export function Chip({
       {children}
     </button>
   );
+}
+
+export function StatusChip({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={cn("chip", className)}>{children}</span>;
 }

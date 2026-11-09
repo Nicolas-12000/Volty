@@ -15,8 +15,8 @@ export function Tooltip({ content, children, className }: TooltipProps) {
         role="tooltip"
         className={cn(
           "pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-30",
-          "w-max max-w-55 -translate-x-1/2 rounded-md border border-hairline-strong shadow-lift",
-          "bg-surface-3 px-2.5 py-1.5 type-caption text-ink",
+          "w-max max-w-55 -translate-x-1/2 rounded-md border border-hairline-strong",
+          "bg-surface-3 px-2.5 py-1.5 text-xs text-ink",
           "opacity-0 transition-opacity duration-150",
           "group-hover/tip:opacity-100 group-focus-within/tip:opacity-100",
         )}
