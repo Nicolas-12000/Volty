@@ -6,13 +6,29 @@ import re
 import unicodedata
 from random import choice
 
-_REDIRECTS = (
-    "Je, eso se me escapa. Soy MATIAS de Volty: planifico cargas del hogar "
-    "(kWh, hora límite, coste o renovables). ¿Qué quieres enchufar o programar?",
-    "Jaja, milanesas y eso no llevo yo — sirvo para cargar el coche, la lavadora, "
-    "el lavavajillas… con los precios del mercado. ¿Qué carga te montamos?",
-    "De cocina, series o deberes no sé nada. En Volty solo armo borradores de consumo "
-    "eléctrico flexible. Dime aparato, kWh y antes de qué hora.",
+# Siempre mencionan Volty y el rol; tono cercano sin chistes literales aleatorios.
+_GENERAL_REDIRECTS = (
+    "Eso va fuera de mi rol. Soy MATIAS en Volty: planifico cargas del hogar "
+    "(kWh, hora límite, coste o renovables). ¿Qué aparato quieres programar?",
+    "No puedo ayudarte con eso. En Volty solo armo borradores de consumo eléctrico "
+    "flexible. Cuéntame qué cargar y antes de qué hora.",
+    "Mi tema es la energía en casa — precios, horarios y cargas como el coche o la lavadora. "
+    "¿Qué quieres optimizar en Volty?",
+)
+
+_COOKING_HINTS = (
+    "cocinar",
+    "milanesa",
+    "receta",
+    "hornear",
+    "pasta ",
+    "pizza",
+    "asado",
+    "cena ",
+    "almuerzo",
+    "desayuno",
+    "comida",
+    "restaurante",
 )
 
 _ENERGY_HINTS = (
@@ -49,18 +65,7 @@ _ENERGY_HINTS = (
 )
 
 _LIFE_TOPICS = (
-    "milanesa",
-    "cocinar",
-    "cocina ",
-    "receta",
-    "hornear",
-    "pasta ",
-    "pizza",
-    "asado",
-    "cena ",
-    "almuerzo",
-    "desayuno",
-    "restaurante",
+    *_COOKING_HINTS,
     "futbol",
     "fútbol",
     "partido",
@@ -101,6 +106,12 @@ def _fold(text: str) -> str:
     return "".join(ch for ch in folded if not unicodedata.combining(ch))
 
 
+def _is_off_topic(text: str) -> bool:
+    return any(pat.search(text) for pat in _OFF_TOPIC_PATTERNS) or any(
+        topic in text for topic in _LIFE_TOPICS
+    )
+
+
 def off_topic_reply(message: str) -> str | None:
     """None = seguir con MATIAS; str = redirigir sin Gemini."""
     text = _fold(message.strip())
@@ -108,8 +119,10 @@ def off_topic_reply(message: str) -> str | None:
         return None
     if any(hint in text for hint in _ENERGY_HINTS):
         return None
-    if any(pat.search(text) for pat in _OFF_TOPIC_PATTERNS):
-        return choice(_REDIRECTS)
-    if any(topic in text for topic in _LIFE_TOPICS):
-        return choice(_REDIRECTS)
-    return None
+    if not _is_off_topic(text):
+        return None
+
+    body = choice(_GENERAL_REDIRECTS)
+    if any(h in text for h in _COOKING_HINTS):
+        return f"Je, de cocina no sé — {body[0].lower() + body[1:]}"
+    return body

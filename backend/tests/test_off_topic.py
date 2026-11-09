@@ -10,8 +10,8 @@ def test_redirects_coding_requests() -> None:
     msg = "Escríbeme un script en Python para ordenar una lista"
     out = off_topic_reply(msg)
     assert out is not None
-    assert "Volty" in out
-    assert "Python" not in out or "cargas" in out
+    assert "volty" in out.lower()
+    assert "script" not in out.lower()
 
 
 def test_redirects_homework_without_blocking_greetings() -> None:
