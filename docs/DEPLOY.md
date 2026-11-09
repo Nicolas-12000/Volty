@@ -97,12 +97,21 @@ En AWS, invocar de nuevo la Lambda de migraciones también ejecuta la seed.
 
 ## Front
 
+**Local (desarrollo / presentación en tu portátil):**
+
 ```bash
 export NEXT_PUBLIC_API_URL="${API%/}/api"
 cd frontend && npm run dev
 ```
 
-Opcional HTTPS: `infra/cloudformation/volty-cdn.yaml` + `./scripts/deploy-frontend.sh`; añade la URL CloudFront a `CorsOrigins` y vuelve a `./scripts/deploy-aws.sh`.
+**Producción (HTTPS público, S3 + CloudFront):**
+
+```bash
+export VOLTY_API_URL="${API%/}/api"
+./scripts/deploy-frontend.sh
+```
+
+Copia la URL `https://….cloudfront.net` que imprime el script en `infra/cloudformation/params.json` → `CorsOrigins` (sustituye `TU-CLOUDFRONT`), luego `./scripts/deploy-aws.sh` para que la API acepte el origen.
 
 ## Apagar todo
 
