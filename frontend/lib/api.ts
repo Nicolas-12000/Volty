@@ -65,15 +65,26 @@ export async function fetchHealth(): Promise<{ status: string; database?: string
 }
 
 export async function fetchPrices(): Promise<PriceSeriesResponse> {
-  const res = await fetch(`${API}/prices`);
-  if (!res.ok) throw new Error("No llegan los precios del mercado. Reintenta o revisa la conexión.");
-  return res.json();
+  try {
+    const res = await fetch(`${API}/prices`, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) throw new Error("No llegan los precios del mercado. Reintenta o revisa la conexión.");
+    return res.json();
+  } catch (err) {
+    if (err instanceof Error && err.name === "TimeoutError") {
+      throw new Error("El mercado no respondió a tiempo. Reintenta en un momento.");
+    }
+    throw err instanceof Error ? err : new Error("No llegan los precios del mercado.");
+  }
 }
 
 export async function fetchRenewableShare(): Promise<{ days: Record<string, number> }> {
-  const res = await fetch(`${API}/renewable-share`);
-  if (!res.ok) return { days: {} };
-  return res.json();
+  try {
+    const res = await fetch(`${API}/renewable-share`, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return { days: {} };
+    return res.json();
+  } catch {
+    return { days: {} };
+  }
 }
 
 export type MatiasAction = {

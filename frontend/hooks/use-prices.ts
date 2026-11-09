@@ -1,12 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  fetchPrices,
-  fetchRenewableShare,
-  type PricePoint,
-  type PriceSeriesResponse,
-} from "@/lib/api";
+import { fetchPrices, fetchRenewableShare, type PricePoint } from "@/lib/api";
 import { berlinDayKey } from "@/lib/format";
 import { useClientClock } from "@/lib/use-client-clock";
 
@@ -31,47 +26,53 @@ export function usePrices(): UsePricesReturn {
   const [intervalMinutes, setIntervalMinutes] = useState(15);
   const [biddingZone, setBiddingZone] = useState("DE-LU");
   const [renewableDays, setRenewableDays] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
+  const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
 
   useEffect(() => {
+    let cancelled = false;
     void (async () => {
       const [series, ren] = await Promise.all([
         fetchPrices().catch((e: unknown) => {
-          setError(e instanceof Error ? e.message : "No llegan los precios del mercado.");
+          if (!cancelled) {
+            setError(e instanceof Error ? e.message : "No llegan los precios del mercado.");
+          }
           return null;
         }),
         fetchRenewableShare(),
       ]);
+      if (cancelled) return;
       if (series) {
         setPrices(series.points);
         setIntervalMinutes(series.interval_minutes);
         setBiddingZone(series.bidding_zone);
       }
       setRenewableDays(ren.days);
-      setLoading(false);
+      setFetching(false);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    if (clock?.nowIso) {
-      setUpdatedAt(
-        new Intl.DateTimeFormat("es-CO", {
-          timeZone: "Europe/Berlin",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }).format(new Date(clock.nowIso)),
-      );
-    }
+    if (!clock?.nowIso) return;
+    setUpdatedAt(
+      new Intl.DateTimeFormat("es-CO", {
+        timeZone: "Europe/Berlin",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).format(new Date(clock.nowIso)),
+    );
   }, [clock?.nowIso]);
 
   const todayKey = clock?.todayKey ?? "";
   const tomorrowKey = clock?.tomorrowKey ?? "";
 
   const pointsForDay = useCallback(
-    (key: string) => prices.filter((p) => berlinDayKey(p.timestamp) === key),
+    (key: string) => (key ? prices.filter((p) => berlinDayKey(p.timestamp) === key) : []),
     [prices],
   );
 
@@ -89,7 +90,7 @@ export function usePrices(): UsePricesReturn {
     intervalMinutes,
     biddingZone,
     renewableDays,
-    loading,
+    loading: fetching || !clock,
     error,
     updatedAt,
     todayPoints,
@@ -99,4 +100,3 @@ export function usePrices(): UsePricesReturn {
     clock,
   };
 }
-
