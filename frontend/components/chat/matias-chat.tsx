@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { MatiasAvatar } from "@/components/chat/matias-avatar";
 import { cn } from "@/lib/cn";
 import {
   matiasChat,
@@ -199,12 +200,19 @@ export function MatiasChat({ className }: { className?: string }) {
 
   if (status !== "authenticated") {
     return (
-      <p className="type-body text-ink-muted">Entra con tu sesión para que MATIAS recuerde tus chats por hogar.</p>
+      <div className="rounded-2xl border border-hairline bg-surface-1 p-5">
+        <p className="text-sm text-ink-muted">
+          MATIAS con memoria por hilo es de tu hogar. Entra para continuar conversaciones y guardar el borrador.
+        </p>
+        <a href="/entrar?next=/matias" className="mt-3 inline-flex text-sm font-medium text-accent-bright hover:text-[#a3acff]">
+          Entrar →
+        </a>
+      </div>
     );
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[220px_1fr_320px]">
+    <div className="grid gap-4 lg:grid-cols-[220px_1fr_320px] lg:gap-6">
       <MatiasThreadList
         threads={threads}
         activeId={threadId}
@@ -214,27 +222,22 @@ export function MatiasChat({ className }: { className?: string }) {
         loading={threadsLoading}
       />
 
-      <div
-        className={cn(
-          "flex min-h-128 flex-col rounded-xl border border-hairline bg-surface-1 shadow-lift",
-          className,
-        )}
-      >
+      <div className={cn("flex min-h-128 flex-col rounded-2xl border border-hairline bg-surface-1", className)}>
         <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
           <MetaCaption backend={meta.backend} rag={meta.rag} />
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-5 sm:p-6">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
           {lines.map((line, i) => (
-            <ChatBubble key={`${line.role}-${i}`} line={line} />
+            <ChatBubble key={`${line.role}-${i}`} line={line} thinking={loading && i === lines.length - 1} />
           ))}
-          {loading ? <p className="type-caption text-ink-dimmed">MATIAS escribe…</p> : null}
-          {error ? <p className="type-body-sm text-peak">{error}</p> : null}
+          {loading ? <p className="text-xs text-ink-dimmed">MATIAS escribe…</p> : null}
+          {error ? <p className="text-sm text-peak">{error}</p> : null}
           <div ref={bottomRef} />
         </div>
 
         <div className="border-t border-hairline p-4">
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <textarea
               rows={2}
               value={draftInput}
@@ -246,7 +249,7 @@ export function MatiasChat({ className }: { className?: string }) {
                 }
               }}
               placeholder="Ej.: mañana el coche 38 kwh para las 7"
-              className="min-h-11 flex-1 resize-none rounded-lg border border-hairline bg-surface-2 px-3 py-2 type-body text-ink focus:outline-none focus:ring-2 focus:ring-accent-subtle"
+              className="min-h-11 flex-1 resize-none rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-ink placeholder:text-ink-dimmed focus:border-hairline-strong focus:outline-none"
             />
             <Button type="button" onClick={() => void send()} disabled={!draftInput.trim() || loading} loading={loading}>
               Enviar
@@ -264,15 +267,15 @@ export function MatiasChat({ className }: { className?: string }) {
               onSaveRemote={() => void syncDraft()}
               saving={draftSaving}
             />
-            <p className="type-caption text-ink-dimmed">
-              Memoria del chat: el borrador se guarda en este hilo hasta que lo apliques o borres el chat.
+            <p className="text-xs text-ink-dimmed">
+              El borrador se guarda en este hilo hasta que lo apliques o borres el chat.
             </p>
             <Button type="button" className="w-full" onClick={applyDraft}>
               Guardar en cargas
             </Button>
           </>
         ) : (
-          <p className="type-body-sm rounded-lg border border-dashed border-hairline p-4 text-ink-muted">
+          <p className="rounded-lg border border-dashed border-hairline p-4 text-sm text-ink-muted">
             MATIAS irá completando el borrador con todo lo que digas en esta conversación.
           </p>
         )}
@@ -283,22 +286,27 @@ export function MatiasChat({ className }: { className?: string }) {
 
 function MetaCaption({ backend, rag }: { backend?: string; rag?: boolean }) {
   return (
-    <p className="type-caption text-ink-dimmed">
+    <p className="text-xs text-ink-dimmed">
       Motor: {backend ?? "gemini/rules"} · memoria por hilo
       {rag ? " · RAG" : ""}
     </p>
   );
 }
 
-function ChatBubble({ line }: { line: ChatLine }) {
+function ChatBubble({ line, thinking }: { line: ChatLine; thinking?: boolean }) {
+  if (line.role === "user") {
+    return (
+      <div className="ml-auto max-w-[88%] rounded-xl rounded-br-sm border border-hairline-strong bg-surface-3 px-4 py-3 text-[15px]">
+        <p className="whitespace-pre-wrap">{line.content}</p>
+      </div>
+    );
+  }
   return (
-    <div
-      className={cn(
-        "max-w-[92%] rounded-lg px-4 py-3 type-body-sm",
-        line.role === "user" ? "ml-auto bg-accent text-white" : "bg-surface-2 text-ink",
-      )}
-    >
-      <p className="whitespace-pre-wrap">{line.content}</p>
+    <div className="flex items-start gap-3">
+      <MatiasAvatar size={36} thinking={thinking} />
+      <div className="max-w-[88%] rounded-xl rounded-tl-sm border border-hairline bg-canvas px-4 py-3 text-[15px]">
+        <p className="whitespace-pre-wrap">{line.content}</p>
+      </div>
     </div>
   );
 }

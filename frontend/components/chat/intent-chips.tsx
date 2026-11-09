@@ -11,25 +11,10 @@ export function IntentChips({ chips, confirmed = false, className }: IntentChips
 
   return (
     <div className={cn("space-y-2", className)}>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="type-label text-ink-muted">MATIAS entendió esto</span>
-        {!confirmed && (
-          <span className="rounded-pill bg-accent-subtle px-2 py-0.5 type-caption font-semibold text-accent">
-            Pendiente de confirmación
-          </span>
-        )}
-      </div>
+      <p className="text-[13px] text-ink-muted">MATIAS entendió esto</p>
       <div className="flex flex-wrap gap-2">
         {chips.map((chip, idx) => (
-          <span
-            key={`${chip}-${idx}`}
-            className={cn(
-              "type-caption inline-flex items-center rounded-sm px-2.5 py-1.5",
-              confirmed
-                ? "border border-hairline bg-surface-3 text-ink"
-                : "border border-dashed border-accent/40 bg-accent-subtle text-accent",
-            )}
-          >
+          <span key={`${chip}-${idx}`} className={cn("chip", !confirmed && "border-accent/40 text-accent-bright")}>
             {chip}
           </span>
         ))}

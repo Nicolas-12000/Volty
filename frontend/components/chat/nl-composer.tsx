@@ -11,13 +11,7 @@ type NlComposerProps = {
   className?: string;
 };
 
-export function NlComposer({
-  value,
-  onChange,
-  onSubmit,
-  loading = false,
-  className,
-}: NlComposerProps) {
+export function NlComposer({ value, onChange, onSubmit, loading = false, className }: NlComposerProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -27,7 +21,7 @@ export function NlComposer({
 
   return (
     <div className={cn("space-y-3", className)}>
-      <label htmlFor="matias-composer" className="type-label text-ink-muted">
+      <label htmlFor="matias-composer" className="text-[13px] text-ink-muted">
         Pregúntale a MATIAS
       </label>
       <textarea
@@ -37,23 +31,13 @@ export function NlComposer({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Carga el Tesla con 45 kWh antes de las 7:30 minimizando coste"
-        className={cn(
-          "w-full resize-none rounded-lg border border-hairline-strong bg-surface-3 p-3.5",
-          "type-body text-ink placeholder:text-ink-dimmed",
-          "focus:border-focus-ring focus:outline-none focus:ring-1 focus:ring-accent-subtle",
-        )}
+        className="w-full resize-none rounded-md border border-hairline bg-canvas p-3 text-sm text-ink placeholder:text-ink-dimmed focus:border-hairline-strong focus:outline-none"
       />
       <div className="flex items-center justify-between gap-3">
-        <span className="type-caption hidden text-ink-dimmed sm:inline">
+        <span className="hidden text-xs text-ink-dimmed sm:inline">
           Enter envía. MATIAS traduce; el optimizador calcula.
         </span>
-        <Button
-          type="button"
-          onClick={onSubmit}
-          disabled={!value.trim() || loading}
-          loading={loading}
-          className="ml-auto"
-        >
+        <Button type="button" onClick={onSubmit} disabled={!value.trim() || loading} loading={loading} className="ml-auto">
           {loading ? "MATIAS está leyendo…" : "MATIAS, interpreta"}
         </Button>
       </div>
