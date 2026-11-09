@@ -10,6 +10,7 @@ export type UsePricesReturn = {
   intervalMinutes: number;
   biddingZone: string;
   renewableDays: Record<string, number>;
+  renewableLoaded: boolean;
   loading: boolean;
   error: string;
   reload: () => void;
@@ -27,6 +28,7 @@ export function usePrices(): UsePricesReturn {
   const [intervalMinutes, setIntervalMinutes] = useState(15);
   const [biddingZone, setBiddingZone] = useState("DE-LU");
   const [renewableDays, setRenewableDays] = useState<Record<string, number>>({});
+  const [renewableLoaded, setRenewableLoaded] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
@@ -37,6 +39,7 @@ export function usePrices(): UsePricesReturn {
   useEffect(() => {
     let cancelled = false;
     setFetching(true);
+    setRenewableLoaded(false);
     void (async () => {
       const [series, ren] = await Promise.all([
         fetchPrices().catch((e: unknown) => {
@@ -55,6 +58,7 @@ export function usePrices(): UsePricesReturn {
         setError("");
       }
       setRenewableDays(ren.days);
+      setRenewableLoaded(true);
       setFetching(false);
     })();
     return () => {
@@ -96,6 +100,7 @@ export function usePrices(): UsePricesReturn {
     intervalMinutes,
     biddingZone,
     renewableDays,
+    renewableLoaded,
     loading: fetching || !clock,
     error,
     reload,
