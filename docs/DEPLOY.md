@@ -83,6 +83,18 @@ API=$(aws cloudformation describe-stacks --stack-name volty \
 
 Demo: `demo@volty.dev` / `valle-0700`.
 
+### Datos de presentación
+
+Tras migrar o al arrancar la API, se crean automáticamente el usuario demo y **cinco hilos MATIAS** con borradores listos (lavado, coche, lavavajillas, fin de semana, ACS). Es idempotente: no duplica si ya existe el hilo marcador `…9901`.
+
+Para forzar la seed en local (con Postgres arriba):
+
+```bash
+cd backend && .venv/bin/python -c "from volty.application.demo_seed import ensure_demo_presentation_seed; ensure_demo_presentation_seed()"
+```
+
+En AWS, invocar de nuevo la Lambda de migraciones también ejecuta la seed.
+
 ## Front
 
 ```bash

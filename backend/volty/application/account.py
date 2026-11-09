@@ -66,7 +66,9 @@ def update_profile(email: str, body: ProfilePatchRequest) -> UserOut:
         ensure_demo_user_seeded()
         row = get_user(key)
         if row is None:
-            raise ValueError("Inicia sesión de nuevo tras configurar la base de datos.")
+            raise ValueError(
+                "No pudimos sincronizar tu cuenta. Cierra sesión y vuelve a entrar."
+            )
     with get_session_factory()() as session:
         db_row = session.get(UserAccount, key)
         if db_row is None:
@@ -85,7 +87,7 @@ def change_password(email: str, body: ChangePasswordRequest) -> None:
     key = email.strip().lower()
     row = get_user(key)
     if row is None:
-        raise ValueError("Cuenta no encontrada en el servidor.")
+        raise ValueError("No encontramos esa cuenta en Volty.")
     if not verify_password(body.current_password, row.password_hash):
         raise ValueError("Contraseña actual incorrecta.")
     with get_session_factory()() as session:
@@ -98,6 +100,14 @@ def change_password(email: str, body: ChangePasswordRequest) -> None:
 
 def personal_summary(email: str) -> MeSummaryResponse:
     key = email.strip().lower()
+    if key == settings.demo_user_email.lower():
+        ensure_demo_user_seeded()
+        try:
+            from volty.application.demo_seed import ensure_demo_presentation_seed
+
+            ensure_demo_presentation_seed()
+        except Exception:
+            pass
     row = get_user(key)
     if row is not None:
         user = user_out_from_row(row)

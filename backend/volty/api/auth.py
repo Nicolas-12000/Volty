@@ -64,7 +64,10 @@ async def current_user(
 async def login(body: LoginBody) -> LoginResponse:
     user = account_app.authenticate(body.email, body.password)
     if user is None:
-        raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos.")
+        raise HTTPException(
+            status_code=401,
+            detail="El correo o la contraseña no coinciden. Demo: demo@volty.dev / valle-0700.",
+        )
     token = _issue_token(user)
     return LoginResponse(access_token=token, user=user)
 
