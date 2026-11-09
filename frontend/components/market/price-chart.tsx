@@ -9,10 +9,18 @@ type PriceChartProps = {
   prices: number[];
   planIdx?: number[];
   nowSlot?: number;
-  withPlan?: boolean;
+  /** Fin del plazo (cuartos de hora desde medianoche del día mostrado). */
+  deadlineSlot?: number | null;
+  deadlineLabel?: string | null;
 };
 
-export function PriceChart({ prices, planIdx = [], nowSlot = -1, withPlan = true }: PriceChartProps) {
+export function PriceChart({
+  prices,
+  planIdx = [],
+  nowSlot = -1,
+  deadlineSlot = null,
+  deadlineLabel = null,
+}: PriceChartProps) {
   const [selected, setSelected] = useState<number | null>(null);
 
   if (!prices.length) {
@@ -35,6 +43,8 @@ export function PriceChart({ prices, planIdx = [], nowSlot = -1, withPlan = true
   const sorted = [...prices].sort((a, b) => a - b);
   const q = sorted[Math.floor(n * 0.25)] ?? sorted[0];
   const planSet = new Set(planIdx);
+  const showGuide = deadlineSlot != null && deadlineSlot > 0 && deadlineSlot <= n;
+  const guideEnd = showGuide ? deadlineSlot : 0;
   const ticks = yTicks(max);
   const active = selected != null && selected >= 0 && selected < n ? selected : null;
   const activePrice = active != null ? prices[active] : null;
@@ -62,12 +72,12 @@ export function PriceChart({ prices, planIdx = [], nowSlot = -1, withPlan = true
             </g>
           );
         })}
-        {withPlan ? (
+        {showGuide ? (
           <g>
-            <rect x={padL} y={padT} width={barW * 28} height={plotH} fill="#5e6ad2" opacity=".08" />
+            <rect x={padL} y={padT} width={barW * guideEnd} height={plotH} fill="#5e6ad2" opacity=".08" />
             <line
-              x1={padL + barW * 28}
-              x2={padL + barW * 28}
+              x1={padL + barW * guideEnd}
+              x2={padL + barW * guideEnd}
               y1={padT}
               y2={padT + plotH}
               stroke="#5e6ad2"
@@ -75,13 +85,13 @@ export function PriceChart({ prices, planIdx = [], nowSlot = -1, withPlan = true
               vectorEffect="non-scaling-stroke"
             />
             <text x={padL + 8} y={20} fill="#828fff" fontSize="13">
-              Ventana hasta las 07:00
+              Plazo{deadlineLabel ? ` antes de las ${deadlineLabel}` : ""}
             </text>
           </g>
         ) : null}
         {prices.map((v, i) => {
           const h = Math.max(2, (v / max) * plotH);
-          const inPlan = withPlan && planSet.has(i);
+          const inPlan = showGuide && planSet.has(i);
           const isSel = active === i;
           const x = padL + i * barW;
           return (
@@ -137,10 +147,10 @@ export function PriceChart({ prices, planIdx = [], nowSlot = -1, withPlan = true
           <i className="size-2 rounded-sm bg-[#4a4f5c]" />
           Horas baratas
         </span>
-        {withPlan ? (
+        {showGuide ? (
           <span className="flex items-center gap-1.5">
             <i className="size-2 rounded-sm bg-[#828fff]" />
-            Recomendado para cargar
+            Tramos baratos dentro del plazo
           </span>
         ) : null}
       </div>

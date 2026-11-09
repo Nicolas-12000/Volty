@@ -16,6 +16,7 @@ import { Sparkline } from "@/components/home/sparkline";
 import { usePrices } from "@/hooks/use-prices";
 import { useLoads } from "@/hooks/use-loads";
 import { useSession } from "@/providers/session-provider";
+import { deadlineGuideForDay } from "@/lib/deadline-guide";
 import { berlinNowSlot, localPlan, slotLabel } from "@/lib/market-demo";
 import { berlinDayKey, formatBerlinTime } from "@/lib/format";
 import { loginHref } from "@/lib/access";
@@ -54,14 +55,28 @@ export function Dashboard() {
   const todayReady = todayPoints.length > 0;
   const marketPending = loading;
   const dayEmpty = !loading && !hasPrices;
-  const plan = useMemo(() => localPlan(prices), [prices]);
+  const activeDayKey = day === 0 ? clock?.todayKey : clock?.tomorrowKey;
+  const guide = useMemo(
+    () => deadlineGuideForDay(loads, activeDayKey, prices.length),
+    [loads, activeDayKey, prices.length],
+  );
+  const plan = useMemo(() => {
+    if (!hasPrices) return { idx: [], cost: 0, base: 0 };
+    if (guide) {
+      return localPlan(prices, {
+        beforeSlot: guide.beforeSlot,
+        count: guide.slotCount,
+        kwhPerSlot: guide.totalEnergyKwh / Math.max(guide.slotCount, 1),
+      });
+    }
+    return localPlan(prices, { beforeSlot: prices.length, count: 8 });
+  }, [prices, guide, hasPrices]);
 
   const mn = hasPrices ? Math.min(...prices) : 0;
   const mx = hasPrices ? Math.max(...prices) : 0;
   const ns = nowSlot == null ? -1 : day === 0 ? Math.min(nowSlot, Math.max(prices.length - 1, 0)) : -1;
   const cur = hasPrices ? prices[day === 0 && ns >= 0 ? ns : 0] ?? 0 : 0;
 
-  const activeDayKey = day === 0 ? clock?.todayKey : clock?.tomorrowKey;
   const liveRenew = activeDayKey != null ? renewableDays[activeDayKey] : undefined;
   const rn = liveRenew != null && Number.isFinite(liveRenew) ? Math.round(liveRenew) : null;
   const renewKnown = renewableLoaded && Object.keys(renewableDays).length > 0;
@@ -196,7 +211,14 @@ export function Dashboard() {
               onReload={reload}
             />
           ) : (
-            <PriceChart key={day} prices={prices} planIdx={plan.idx} nowSlot={ns} />
+            <PriceChart
+              key={day}
+              prices={prices}
+              planIdx={plan.idx}
+              nowSlot={ns}
+              deadlineSlot={guide?.beforeSlot ?? null}
+              deadlineLabel={guide?.deadlineLabel ?? null}
+            />
           )}
         </div>
         <aside
@@ -212,7 +234,7 @@ export function Dashboard() {
                 : "Sin precios no podemos armar un horario. Prueba de nuevo en un rato."}
             </p>
           ) : (
-            <PlanCard plan={plan} />
+            <PlanCard plan={plan} guide={guide} />
           )}
         </aside>
       </div>

@@ -14,15 +14,23 @@ export type LocalPlan = {
   base: number;
 };
 
-/** 8 tramos (2 h a 7,4 kW) más baratos antes de `beforeSlot` (07:00 = 28). */
-export function localPlan(prices: number[], beforeSlot = 28, count = 8): LocalPlan {
+export type LocalPlanOptions = {
+  beforeSlot?: number;
+  count?: number;
+  kwhPerSlot?: number;
+};
+
+/** Tramos más baratos dentro del plazo (cuartos de hora [0, beforeSlot)). */
+export function localPlan(prices: number[], options: LocalPlanOptions = {}): LocalPlan {
+  const beforeSlot = options.beforeSlot ?? Math.min(28, prices.length);
+  const count = options.count ?? 8;
+  const kwhPerSlot = options.kwhPerSlot ?? 1.85;
   if (!prices.length) return { idx: [], cost: 0, base: 0 };
-  const limit = Math.min(beforeSlot, prices.length);
+  const limit = Math.min(Math.max(beforeSlot, 1), prices.length);
   const idx = [...Array(limit).keys()]
     .sort((a, b) => prices[a] - prices[b])
     .slice(0, Math.min(count, limit))
     .sort((a, b) => a - b);
-  const kwhPerSlot = 1.85;
   const costOf = (slots: number[]) =>
     slots.reduce((t, i) => t + (prices[i] ?? 0), 0) * (kwhPerSlot / 1000);
   const base = [...Array(Math.min(count, prices.length)).keys()];

@@ -61,7 +61,7 @@ function ChatDemoPlay({ onReplay }: { onReplay: () => void }) {
     () => tomorrowPoints.map((p) => p.price_eur_per_mwh),
     [tomorrowPoints],
   );
-  const pl = useMemo(() => localPlan(tomorrow), [tomorrow]);
+  const pl = useMemo(() => localPlan(tomorrow, { beforeSlot: 28, count: 8 }), [tomorrow]);
   const hasPlan = pl.idx.length > 0;
 
   async function submitLive() {

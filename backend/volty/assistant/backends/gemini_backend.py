@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from volty.assistant.context import build_system_prompt
-from volty.assistant.pipeline import format_reply, resolve_slots, turn_from_slots
+from volty.assistant.off_topic import off_topic_reply
+from volty.assistant.pipeline import ResolvedSlots, format_reply, resolve_slots, turn_from_slots
 from volty.assistant.security import wrap_user_content_for_model
 from volty.assistant.state import AssistantTurn, ThreadState
 from volty.core.schemas import ParsedIntent
@@ -23,6 +24,15 @@ class GeminiAssistantBackend:
         user_email: str | None = None,
     ) -> AssistantTurn:
         _ = user_email
+        last_user = next((m.content for m in reversed(state.messages) if m.role == "user"), "")
+        redirect = off_topic_reply(last_user)
+        if redirect:
+            return turn_from_slots(
+                ResolvedSlots(clarify=redirect, intent=None),
+                no_intent_message="",
+                reply_for_intent=lambda _: "",
+            )
+
         slots = resolve_slots(state, context_load_name)
 
         def reply_for_intent(intent: ParsedIntent) -> str:

@@ -7,6 +7,7 @@ from volty.assistant.backends.registry import get_assistant_backend
 from volty.assistant.memory.memory_store import get_thread_store
 from volty.assistant.ports import ThreadStore
 from volty.assistant.rag.registry import get_retriever
+from volty.assistant.off_topic import off_topic_reply
 from volty.assistant.security import (
     guard_user_message,
     refusal_for_injection,
@@ -90,6 +91,23 @@ def handle_chat(
             draft=state.draft,
             actions=default_actions(state.draft),
             backend="policy",
+            rag_used=False,
+        )
+
+    last_user = guard.text if guard is not None else (state.messages[-1].content if state.messages else "")
+    redirect = off_topic_reply(last_user)
+    if redirect and (req.message or (req.messages and len(req.messages) > 0)):
+        reply = sanitize_assistant_text(redirect)
+        state.messages.append(ChatMessage(role="assistant", content=reply))
+        _store.save(state)
+        return MatiasChatResponse(
+            thread_id=state.thread_id,
+            reply=reply,
+            messages=state.messages,
+            intent=state.draft,
+            draft=state.draft,
+            actions=default_actions(state.draft),
+            backend="scope",
             rag_used=False,
         )
 

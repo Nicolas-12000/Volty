@@ -1,10 +1,11 @@
 "use client";
 
 import { Matias } from "@/components/brand/poodle";
+import type { DeadlineGuide } from "@/lib/deadline-guide";
 import { fmtEuro, slotLabel, type LocalPlan } from "@/lib/market-demo";
 import { cn } from "@/lib/cn";
 
-export function PlanCard({ plan }: { plan: LocalPlan }) {
+export function PlanCard({ plan, guide }: { plan: LocalPlan; guide?: DeadlineGuide | null }) {
   const save = Math.max(0, plan.base - plan.cost);
   const pct = plan.base > 0 ? Math.round((1 - plan.cost / plan.base) * 100) : 0;
   const windows = planWindows(plan.idx);
@@ -15,8 +16,16 @@ export function PlanCard({ plan }: { plan: LocalPlan }) {
       <div className="flex items-start gap-3">
         <Matias size={40} />
         <div className="min-w-0 flex-1">
-          <p className="text-[15px] font-semibold tracking-[-0.2px] text-ink">Mejor momento para cargar</p>
-          <p className="mt-0.5 text-xs text-ink-muted">Antes de las 07:00 · 14,8 kWh</p>
+          <p className="text-[15px] font-semibold tracking-[-0.2px] text-ink">
+            {guide ? "Valles dentro de tu plazo" : "Precios del mercado"}
+          </p>
+          <p className="mt-0.5 text-xs text-ink-muted">
+            {guide
+              ? `Antes de las ${guide.deadlineLabel} · ${guide.loadCount} ${
+                  guide.loadCount === 1 ? "carga" : "cargas"
+                } · ${fmtEuro(guide.totalEnergyKwh)} kWh`
+              : "Añade cargas con hora límite en MATIAS o en Tus cargas para ver tu plazo aquí."}
+          </p>
         </div>
       </div>
 
