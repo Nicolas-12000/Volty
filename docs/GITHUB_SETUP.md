@@ -75,7 +75,7 @@ openssl rand -hex 32
 | Nombre | Valor (pegado tal cual) |
 |--------|-------------------------|
 | `AWS_REGION` | `eu-central-1` |
-| `CORS_ORIGINS` | Ver bloque de abajo |
+| `CORS_ORIGINS` | **Obligatorio en producción** — localhost + tu CloudFront (ver abajo) |
 
 **`CORS_ORIGINS`** (una sola línea, con comas, sin espacios extra). Incluye **tu** URL de CloudFront cuando la tengas:
 

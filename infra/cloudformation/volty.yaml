@@ -228,14 +228,6 @@ Resources:
     Properties:
       TargetFunctionArn: !Ref ApiFunction
       AuthType: NONE
-      Cors:
-        AllowOrigins: !Ref CorsOrigins
-        AllowMethods:
-          - "*"
-        AllowHeaders:
-          - authorization
-          - content-type
-        MaxAge: 3600
 
   FunctionUrlPermission:
     Type: AWS::Lambda::Permission

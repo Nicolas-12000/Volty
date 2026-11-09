@@ -28,15 +28,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# En Lambda la CORS la define la Function URL (evita cabeceras duplicadas en el navegador).
-if not os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.cors_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+# CORS en la app (Function URL a veces no devuelve Access-Control-Allow-Origin).
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(api_router, prefix="/api")
 
