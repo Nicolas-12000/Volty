@@ -32,10 +32,12 @@ class EnergyChartsClient:
         start = self._ensure_tz(start)
         end = self._ensure_tz(end)
 
-        cache_key = f"price:v2:{bzn}:{start.isoformat()}:{end.isoformat()}"
+        cache_key = f"price:v2:{bzn}:{start.date().isoformat()}:{end.date().isoformat()}"
         cached = self.cache.get(cache_key)
         if cached:
-            return PriceSeriesResponse.model_validate(cached)
+            result = PriceSeriesResponse.model_validate(cached)
+            if self._horizon_ok(result.points, start):
+                return result
 
         params = {
             "bzn": bzn,
@@ -105,6 +107,14 @@ class EnergyChartsClient:
         if serializable:
             self.cache.set(cache_key, serializable)
         return shares
+
+    def _horizon_ok(self, points: list[PricePoint], start: datetime) -> bool:
+        """Antes de la subasta basta con hoy. A partir de las 13:00 Berlin hay que tener mañana."""
+        tomorrow = start.astimezone(self.tz).date() + timedelta(days=1)
+        has_tomorrow = any(p.timestamp.astimezone(self.tz).date() >= tomorrow for p in points)
+        if has_tomorrow:
+            return True
+        return datetime.now(self.tz).hour < 13
 
     def _ensure_tz(self, dt: datetime) -> datetime:
         if dt.tzinfo is None:
