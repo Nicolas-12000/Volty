@@ -43,8 +43,11 @@ CF_DOMAIN="$(aws_cli cloudformation describe-stacks --stack-name "$STACK" \
 DIST_ID="$(aws_cli cloudformation describe-stacks --stack-name "$STACK" \
   --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" --output text)"
 
-echo "==> next build (export estático, API embebida en el bundle)"
+echo "==> dependencias frontend"
 cd "$ROOT/frontend"
+npm ci
+
+echo "==> next build (export estático, API embebida en el bundle)"
 NEXT_PUBLIC_API_URL="$API_URL" VOLTY_STATIC_EXPORT=1 npm run build
 
 echo "==> s3 sync → s3://${BUCKET}/"
