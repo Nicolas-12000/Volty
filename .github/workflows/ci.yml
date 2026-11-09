@@ -50,4 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: pip install cfn-lint && cfn-lint infra/cloudformation/volty.yaml
+      - name: cfn-lint
+        run: |
+          pip install cfn-lint
+          cfn-lint -c infra/cloudformation/.cfnlintrc.yaml \
+            --non-zero-exit-code error \
+            infra/cloudformation/volty.yaml \
+            infra/cloudformation/volty-cdn.yaml
