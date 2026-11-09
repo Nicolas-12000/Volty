@@ -109,6 +109,12 @@ jobs:
             --parameter-overrides "${OVERRIDES[@]}" \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset
+          # Misma clave S3: CloudFormation no sustituye el zip. Hay que publicar el código a mano.
+          for FN in volty-api volty-migrate; do
+            aws lambda update-function-code --function-name "$FN" \
+              --s3-bucket "$BUCKET" --s3-key releases/api.zip >/dev/null
+            aws lambda wait function-updated-v2 --function-name "$FN"
+          done
           MIGRATE=$(aws cloudformation describe-stacks --stack-name volty \
             --query "Stacks[0].Outputs[?OutputKey=='MigrateFunctionName'].OutputValue" --output text)
           aws lambda invoke --function-name "$MIGRATE" /tmp/migrate.json

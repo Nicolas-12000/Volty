@@ -95,6 +95,15 @@ aws_cli cloudformation deploy \
 MIGRATE_FN="$(aws_cli cloudformation describe-stacks --stack-name "$STACK" \
   --query "Stacks[0].Outputs[?OutputKey=='MigrateFunctionName'].OutputValue" --output text)"
 
+# La plantilla apunta siempre a releases/api.zip. Si el template no cambia,
+# CloudFormation deja la Lambda con el zip anterior.
+echo "==> Publicar código en volty-api y volty-migrate"
+for FN in volty-api volty-migrate; do
+  aws_cli lambda update-function-code --function-name "$FN" \
+    --s3-bucket "$BUCKET" --s3-key releases/api.zip >/dev/null
+  aws_cli lambda wait function-updated-v2 --function-name "$FN"
+done
+
 echo "==> Migraciones Alembic"
 aws_cli lambda invoke --function-name "$MIGRATE_FN" /tmp/volty-migrate-out.json
 cat /tmp/volty-migrate-out.json
