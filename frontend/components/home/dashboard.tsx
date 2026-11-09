@@ -32,6 +32,7 @@ export function Dashboard() {
     todayPoints,
     tomorrowPoints,
     renewableDays,
+    renewableLoaded,
     loading,
     error,
     reload,
@@ -61,18 +62,9 @@ export function Dashboard() {
   const cur = hasPrices ? prices[day === 0 && ns >= 0 ? ns : 0] ?? 0 : 0;
 
   const activeDayKey = day === 0 ? clock?.todayKey : clock?.tomorrowKey;
-  const liveRenew = useMemo(() => {
-    if (!activeDayKey) return undefined;
-    if (renewableDays[activeDayKey] != null) return renewableDays[activeDayKey];
-    // Energy-Charts publica el promedio diario con un día de retraso.
-    if (day !== 0) return undefined;
-    const prior = Object.keys(renewableDays)
-      .filter((k) => k <= activeDayKey)
-      .sort()
-      .at(-1);
-    return prior != null ? renewableDays[prior] : undefined;
-  }, [activeDayKey, renewableDays, day]);
+  const liveRenew = activeDayKey != null ? renewableDays[activeDayKey] : undefined;
   const rn = liveRenew != null && Number.isFinite(liveRenew) ? Math.round(liveRenew) : null;
+  const renewKnown = renewableLoaded && Object.keys(renewableDays).length > 0;
   const renewPending = loading;
 
   const minIdx = hasPrices ? prices.indexOf(mn) : -1;
@@ -106,7 +98,7 @@ export function Dashboard() {
           label: "Renovables",
           value: rn != null ? `${rn}%` : "—",
           unit: "del mix",
-          spark: renewSpark.some((v) => v > 0) ? renewSpark : prices,
+          spark: renewSpark.some((v) => v > 0) ? renewSpark : [],
           green: false,
         },
       ]
@@ -239,9 +231,11 @@ export function Dashboard() {
             </>
           ) : (
             <p className="mt-3 text-sm text-ink-muted">
-              {dayEmpty && day === 1
-                ? "El mix renovable de mañana llega junto con los precios."
-                : "Hoy no tenemos el porcentaje de renovables."}
+              {!renewKnown
+                ? "Aún no llega el porcentaje de renovables. Recarga la página para ver si ya lo publicaron."
+                : day === 1
+                  ? "Aún no han subido el mix de mañana. Sale cuando cierra ese día en Alemania. Recarga más tarde para ver si ya está."
+                  : "Aún no han subido el porcentaje de hoy. Lo publican al cerrar el día en Alemania. Recarga más tarde para ver si ya está."}
             </p>
           )}
         </div>
