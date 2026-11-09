@@ -2,6 +2,52 @@
 
 **No usamos Terraform en el flujo principal.** Plantillas en `infra/cloudformation/`; scripts en `scripts/`.
 
+## 0. Cuenta estudiante / Academy (límites y ahorro)
+
+La **arquitectura del código** no cambia (monolito modular, mismos endpoints). Solo cambia **qué plantilla** despliegues:
+
+| Recurso | `volty-student` (recomendado) | `volty-secure` (prod) |
+|---------|-------------------------------|------------------------|
+| NAT Gateway | **No** (~32 USD/mes evitados) | Sí |
+| RDS `db.t4g.micro` | Sí; **sin backups** (`BackupRetentionPeriod: 0`) | Privado; backups 7 días |
+| Lambda en VPC | No (sale a Energy-Charts/Gemini directo) | Sí, subnets privadas |
+| Al borrar stack | RDS **Delete** (sin snapshot residual que cobre) | Snapshot |
+
+Límites habituales en **AWS Educate / free tier** (si falla el deploy, revisa aquí):
+
+| Error / límite | Qué hace Volty |
+|----------------|----------------|
+| *backup retention exceeds free tier* | Student usa **0** días de backup (parámetro `BackupRetentionPeriod`) |
+| Solo 1 RDS micro | Un stack `volty-student`; no despliegues `volty-prod` a la vez |
+| Créditos finitos | **`./scripts/teardown-aws.sh`** apaga todo en minutos |
+| Cobro inesperado | Budget en consola + teardown; no usamos Lambda auto-destruct (IAM demasiado amplio) |
+
+**Ahorrar sin romper el diseño:** un solo stack activo, student sin NAT, logs Lambda **7 días**, memoria API **512 MB**, apagar con teardown cuando no demos.
+
+### Apagar todo (dejar de pagar)
+
+```bash
+export AWS_PROFILE=volty-deploy AWS_DEFAULT_REGION=eu-central-1
+./scripts/teardown-aws.sh
+# escribe: borrar-volty
+
+# Sin preguntas (CI / automatización local):
+VOLTY_DESTROY_YES=1 ./scripts/teardown-aws.sh
+# VOLTY_DELETE_BUCKETS=1 para borrar también los buckets S3
+```
+
+Borra stacks `volty-student`, `volty-free`, `volty-prod`, `volty-web`, `volty-cdn` si existen. **Datos RDS perdidos** (sin backup en student).
+
+**Presupuesto recomendado (consola):** Billing → Budgets → alerta email a **5–10 USD/mes**.
+
+Tras un deploy fallido (`ROLLBACK_COMPLETE`):
+
+```bash
+aws cloudformation delete-stack --stack-name volty-student
+aws cloudformation wait stack-delete-complete --stack-name volty-student
+./scripts/deploy-aws.sh
+```
+
 ## 1. Elige un modo
 
 | Modo | Cuándo | Script | Stack | Coste fijo (orientativo) |
@@ -148,6 +194,7 @@ Checklist cuenta AWS:
 | Token inválido | `AWS_PROFILE` + `AWS_DEFAULT_REGION=eu-central-1` |
 | Deploy lento la 1ª vez | RDS + zip grande; normal |
 | Precios vacíos | Revisar salida a `api.energy-charts.info` (Lambda sin VPC en student) |
+| RDS backup / free tier | Plantilla student con `BackupRetentionPeriod=0`; borrar stack en rollback y redeploy |
 
 ## 9. Desarrollo local (referencia)
 

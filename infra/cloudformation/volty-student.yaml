@@ -29,6 +29,12 @@ Parameters:
     Type: String
     Default: "0.0.0.0/0"
     Description: CIDR permitido a 5432 en RDS (acota a tu IP/32 en demo seria)
+  BackupRetentionPeriod:
+    Type: Number
+    Default: 0
+    MinValue: 0
+    MaxValue: 35
+    Description: 0 obligatorio en AWS Academy / free tier; sube en prod
 
 Resources:
   Vpc:
@@ -122,8 +128,8 @@ Resources:
 
   Database:
     Type: AWS::RDS::DBInstance
-    DeletionPolicy: Snapshot
-    UpdateReplacePolicy: Snapshot
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
       DBInstanceIdentifier: !Sub "${ProjectName}-student-db"
       Engine: postgres
@@ -138,8 +144,9 @@ Resources:
         - !Ref DbSecurityGroup
       DBSubnetGroupName: !Ref DbSubnetGroup
       PubliclyAccessible: true
-      BackupRetentionPeriod: 3
+      BackupRetentionPeriod: !Ref BackupRetentionPeriod
       DeletionProtection: false
+      CopyTagsToSnapshot: false
       MultiAZ: false
 
   LambdaRole:
@@ -164,15 +171,28 @@ Resources:
                 Action: secretsmanager:GetSecretValue
                 Resource: !Ref DbSecret
 
+  ApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-api-student"
+      RetentionInDays: 7
+
+  MigrateLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-migrate-student"
+      RetentionInDays: 7
+
   ApiFunction:
     Type: AWS::Lambda::Function
-    DependsOn: Database
+    DependsOn:
+      - ApiLogGroup
     Properties:
       FunctionName: !Sub "${ProjectName}-api-student"
       Runtime: python3.12
       Handler: handler.lambda_handler
       Timeout: 29
-      MemorySize: 1024
+      MemorySize: 512
       Role: !GetAtt LambdaRole.Arn
       Code:
         S3Bucket: !Ref ArtifactsBucket
@@ -194,7 +214,9 @@ Resources:
 
   MigrateFunction:
     Type: AWS::Lambda::Function
-    DependsOn: ApiFunction
+    DependsOn:
+      - ApiFunction
+      - MigrateLogGroup
     Properties:
       FunctionName: !Sub "${ProjectName}-migrate-student"
       Runtime: python3.12

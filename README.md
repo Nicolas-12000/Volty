@@ -99,7 +99,7 @@ make ingest            # precios Energy-Charts → DB (opcional)
 
 ## Despliegue AWS (resumen)
 
-Guía completa: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+Guía completa: **[docs/DEPLOY.md](docs/DEPLOY.md)** · Apagar AWS: `./scripts/teardown-aws.sh`
 
 ```bash
 export AWS_PROFILE=tu-perfil AWS_DEFAULT_REGION=eu-central-1

@@ -9,4 +9,10 @@
 
 Parámetros: copia `params.example.json` → `params.json` (gitignored).
 
-Despliegue y checklist: **[`docs/DEPLOY.md`](../../docs/DEPLOY.md)**.
+Despliegue y checklist: **[`docs/DEPLOY.md`](../../docs/DEPLOY.md)**.  
+Apagar todo: **`scripts/teardown-aws.sh`** (student: backup RDS **0**, borrado sin snapshot).
+
+### IDE: `Unresolved tag !Ref`
+
+Válido en CloudFormation. Instala la extensión **YAML** (Red Hat) y recarga la ventana; el repo define `yaml.customTags` en `.vscode/settings.json`.  
+Avisos **cfn-guard** (RDS público, Lambda sin VPC, Function URL): esperados en modo estudiante.

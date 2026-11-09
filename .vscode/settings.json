@@ -1,0 +1,33 @@
+{
+  "yaml.customTags": [
+    "!And scalar",
+    "!Base64 scalar",
+    "!Cidr scalar",
+    "!Equals scalar",
+    "!FindInMap scalar",
+    "!GetAtt scalar",
+    "!GetAZs scalar",
+    "!If scalar",
+    "!ImportValue scalar",
+    "!Join sequence",
+    "!Not scalar",
+    "!Or scalar",
+    "!Ref scalar",
+    "!Select sequence",
+    "!Split sequence",
+    "!Sub scalar",
+    "!Transform scalar"
+  ],
+  "yaml.schemas": {
+    "https://json.schemastore.org/cloudformation.template.json": [
+      "infra/cloudformation/**/*.yaml",
+      "infra/cloudformation/**/*.yml"
+    ]
+  },
+  "yaml.schemaStore.enable": true,
+  "yaml.validate": true,
+  "files.associations": {
+    "infra/cloudformation/*.yaml": "yaml",
+    "infra/cloudformation/*.yml": "yaml"
+  }
+}
