@@ -7,7 +7,7 @@ export function MatiasTypingIndicator() {
       <MatiasAvatar size={36} thinking />
       <div className="rounded-xl rounded-tl-sm border border-hairline bg-canvas px-4 py-3.5">
         <span className="sr-only">MATIAS escribe</span>
-        <span className="flex h-[1.125rem] items-center gap-1.5" aria-hidden="true">
+        <span className="flex h-4.5 items-center gap-1.5" aria-hidden="true">
           <span className="typing-dot size-1.5 rounded-full bg-ink-muted" />
           <span className="typing-dot size-1.5 rounded-full bg-ink-muted" />
           <span className="typing-dot size-1.5 rounded-full bg-ink-muted" />
