@@ -25,6 +25,7 @@ export type LoadFormData = {
   energy_kwh: number;
   max_power_kw: number;
   deadlineLocal: string;
+  must_run?: boolean;
 };
 
 export type StoredLoads = {

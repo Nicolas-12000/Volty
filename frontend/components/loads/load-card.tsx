@@ -28,7 +28,10 @@ export function LoadCard({ load, selected = false, onSelect, onRemove }: LoadCar
         <p className="mt-2 text-sm text-ink-muted">
           {load.energy_kwh} kWh · {load.max_power_kw} kW
         </p>
-        <p className="mt-1 text-xs text-ink-dimmed">Antes de {deadlineDisplay}</p>
+        <p className="mt-1 text-xs text-ink-dimmed">
+          Antes de {deadlineDisplay}
+          {load.must_run ? " · sin pausas" : ""}
+        </p>
       </button>
       <button
         type="button"

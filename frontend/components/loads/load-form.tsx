@@ -62,6 +62,14 @@ export function LoadForm({ load, clock, onChange, className }: LoadFormProps) {
             onChange={(e) => onChange({ deadlineLocal: e.target.value })}
           />
         </div>
+        <label className="flex items-center gap-2 sm:col-span-2">
+          <input
+            type="checkbox"
+            checked={!!load.must_run}
+            onChange={(e) => onChange({ must_run: e.target.checked })}
+          />
+          <span className="text-sm text-ink-muted">No se puede pausar una vez arranca</span>
+        </label>
       </div>
       {validationError ? (
         <div className="rounded-md border border-hill/30 bg-hill-subtle p-3">

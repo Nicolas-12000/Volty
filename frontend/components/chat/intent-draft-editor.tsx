@@ -115,6 +115,14 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
                   className={field}
                 />
               </label>
+              <label className="flex items-center gap-2 sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={!!load.must_run}
+                  onChange={(e) => patchLoadAt(index, { must_run: e.target.checked })}
+                />
+                <span className="text-xs text-ink-muted">No se puede pausar una vez arranca</span>
+              </label>
             </div>
           </li>
         ))}
@@ -144,6 +152,11 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
           <option value="minimize_cost">Minimizar coste</option>
           <option value="balance_cost_renewables">Coste + renovables</option>
         </select>
+        {draft.preferences.objective === "balance_cost_renewables" ? (
+          <span className="mt-1 block text-xs text-ink-dimmed">
+            Peso a renovables: {Math.round(draft.preferences.renewable_weight * 100)}%
+          </span>
+        ) : null}
       </label>
       {onSaveRemote ? (
         <button

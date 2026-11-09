@@ -238,7 +238,7 @@ export function MatiasChat({ className }: { className?: string }) {
         </div>
 
         <div className="border-t border-hairline p-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <textarea
               rows={2}
               value={draftInput}
@@ -266,7 +266,7 @@ export function MatiasChat({ className }: { className?: string }) {
         </div>
       </div>
 
-      <aside className="space-y-4">
+      <aside className="space-y-4 lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:pr-1">
         {draft ? (
           <>
             <IntentDraftEditor

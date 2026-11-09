@@ -93,6 +93,7 @@ export function useLoads() {
       energy_kwh: load.energy_kwh,
       max_power_kw: load.max_power_kw,
       deadlineLocal: formatBerlinDateTimeLocal(new Date(load.deadline)),
+      must_run: !!load.must_run,
     }));
     if (next.length) setLoads(next);
     setPriority(priorityFromPrefs(parsed.preferences));
@@ -108,6 +109,7 @@ export function useLoads() {
         max_power_kw: load.max_power_kw,
         window_start: clock?.nowIso ?? deadline,
         deadline,
+        must_run: !!load.must_run,
       };
     });
   }, [loads, clock]);
