@@ -85,13 +85,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   return (
     <SessionContext.Provider value={value}>
+      {children}
       {gateLoading ? (
-        <div className="flex min-h-dvh items-center justify-center bg-canvas">
-          <p className="type-body text-ink-muted">Cargando Volty…</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-canvas">
+          <p className="text-sm text-ink-muted">Cargando Volty…</p>
         </div>
-      ) : (
-        children
-      )}
+      ) : null}
     </SessionContext.Provider>
   );
 }

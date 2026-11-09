@@ -27,10 +27,7 @@ export function UserMenu({ compact }: { compact?: boolean }) {
 
   if (status !== "authenticated" || !user) {
     return (
-      <Link
-        href="/entrar"
-        className="type-body-sm rounded-md border border-hairline bg-surface-2 px-3 py-1.5 text-ink hover:bg-surface-hover"
-      >
+      <Link href="/entrar" className="hidden px-3 py-2 text-sm font-medium text-ink-soft hover:text-white sm:block">
         Entrar
       </Link>
     );
@@ -42,22 +39,21 @@ export function UserMenu({ compact }: { compact?: boolean }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex items-center gap-2 rounded-md border border-hairline bg-surface-2 py-1.5 pl-1.5 pr-2.5 text-left transition-colors hover:bg-surface-hover",
-          compact && "pr-2",
+          "flex items-center gap-2 rounded-md border border-hairline bg-surface-1 py-1 pl-1 pr-2 text-left transition-colors hover:bg-surface-2",
+          compact && "pr-1.5",
         )}
         aria-expanded={open}
         aria-haspopup="menu"
       >
         <span
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent-subtle text-xs font-semibold text-accent"
+          className="flex size-7 shrink-0 items-center justify-center rounded-md bg-accent-subtle text-[11px] font-semibold text-accent-bright"
           aria-hidden="true"
         >
           {initials(user.name)}
         </span>
         {!compact ? (
           <span className="min-w-0 max-w-32">
-            <span className="block truncate type-body-sm font-medium text-ink">{user.name}</span>
-            <span className="block truncate type-caption text-ink-dimmed">Volty · MATIAS</span>
+            <span className="block truncate text-[13px] font-medium text-ink">{user.name}</span>
           </span>
         ) : null}
       </button>
@@ -65,24 +61,40 @@ export function UserMenu({ compact }: { compact?: boolean }) {
       {open ? (
         <div
           role="menu"
-          className="absolute bottom-full right-0 z-50 mb-2 w-56 rounded-lg border border-hairline bg-surface-1 p-1 shadow-lift min-[1025px]:bottom-auto min-[1025px]:top-full min-[1025px]:mb-0 min-[1025px]:mt-2"
+          className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-hairline bg-surface-1 p-1"
         >
           <div className="border-b border-hairline px-3 py-2">
-            <p className="type-body-sm font-medium text-ink">{user.name}</p>
-            <p className="type-caption truncate text-ink-dimmed">{user.email}</p>
+            <p className="text-sm font-medium text-ink">{user.name}</p>
+            <p className="truncate text-xs text-ink-dimmed">{user.email}</p>
           </div>
           <Link
             href="/hogar"
             role="menuitem"
-            className="type-body-sm flex w-full rounded-md px-3 py-2 text-left text-ink-muted hover:bg-surface-hover hover:text-ink"
+            className="flex w-full rounded-md px-3 py-2 text-left text-sm text-ink-muted hover:bg-surface-2 hover:text-ink"
             onClick={() => setOpen(false)}
           >
             Tu hogar
           </Link>
           <Link
+            href="/loads"
+            role="menuitem"
+            className="flex w-full rounded-md px-3 py-2 text-left text-sm text-ink-muted hover:bg-surface-2 hover:text-ink"
+            onClick={() => setOpen(false)}
+          >
+            Cargas
+          </Link>
+          <Link
+            href="/plan"
+            role="menuitem"
+            className="flex w-full rounded-md px-3 py-2 text-left text-sm text-ink-muted hover:bg-surface-2 hover:text-ink"
+            onClick={() => setOpen(false)}
+          >
+            Plan
+          </Link>
+          <Link
             href="/hogar/ajustes"
             role="menuitem"
-            className="type-body-sm flex w-full rounded-md px-3 py-2 text-left text-ink-muted hover:bg-surface-hover hover:text-ink"
+            className="flex w-full rounded-md px-3 py-2 text-left text-sm text-ink-muted hover:bg-surface-2 hover:text-ink"
             onClick={() => setOpen(false)}
           >
             Ajustes
@@ -90,7 +102,7 @@ export function UserMenu({ compact }: { compact?: boolean }) {
           <button
             type="button"
             role="menuitem"
-            className="type-body-sm mt-1 flex w-full rounded-md px-3 py-2 text-left text-ink-muted hover:bg-surface-hover hover:text-ink"
+            className="mt-1 flex w-full rounded-md px-3 py-2 text-left text-sm text-ink-muted hover:bg-surface-2 hover:text-ink"
             onClick={() => {
               setOpen(false);
               logout();

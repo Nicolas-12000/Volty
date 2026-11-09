@@ -1,46 +1,47 @@
 @import "tailwindcss";
 
-/* ─── Volty Electric Design System ─────────────────────────────────────────── */
+/* ─── Volty · Linear-inspired, dark only ───────────────────────────────────── */
 
 :root {
-  /* Night indigo — warmer than pure black, still one accent */
-  --v-canvas: #101428;
-  --v-surface-1: #171c33;
-  --v-surface-2: #1e2542;
-  --v-surface-3: #283056;
-  --v-surface-hover: #ffffff10;
+  --v-canvas: #000000;
+  --v-surface-1: #0a0a0b;
+  --v-surface-2: #101012;
+  --v-surface-3: #161618;
+  --v-surface-hover: #ffffff08;
 
-  --v-accent: #8b93ff;
-  --v-accent-dim: #6f78f2;
-  --v-accent-subtle: #8b93ff24;
-  --v-accent-glow: #8b93ff40;
-  --v-accent-bright: #c4c9ff;
+  --v-accent: #6b76d9;
+  --v-accent-dim: #565fc4;
+  --v-accent-subtle: #6b76d922;
+  --v-accent-glow: #8b93ff33;
+  --v-accent-bright: #8b93ff;
+  --v-accent-soft: #a8afff;
 
-  --v-ink: #f6f4ef;
-  --v-ink-muted: #b7b4c8;
-  --v-ink-dimmed: #7d829c;
+  --v-ink: #f7f8f8;
+  --v-ink-soft: #c8cdd6;
+  --v-ink-muted: #8a8f98;
+  --v-ink-dimmed: #62666d;
 
-  /* Semantic — energy data only, never decorative */
-  --v-valley-deep: #22d3a0;
-  --v-valley-deep-subtle: #22d3a01a;
-  --v-valley: #6fb1d6;
-  --v-plain: #8b95a8;
-  --v-hill: #f5a623;
-  --v-hill-subtle: #f5a6231a;
-  --v-peak: #ff6b6b;
-  --v-peak-subtle: #ff6b6b1a;
-  --v-leaf: #22d3a0;
+  --v-leaf: #3ddc84;
+  --v-leaf-bright: #5fd47c;
+  --v-leaf-subtle: #3ddc8418;
+  --v-valley-deep: #3ddc84;
+  --v-valley-deep-subtle: #3ddc8418;
+  --v-valley: #4a4f5c;
+  --v-plain: #25272c;
+  --v-hill: #c9a227;
+  --v-hill-subtle: #c9a2271a;
+  --v-peak: #e5484d;
+  --v-peak-subtle: #e5484d1a;
 
-  /* Borders */
-  --v-hairline: #ffffff14;
-  --v-hairline-strong: #ffffff24;
+  --v-hairline: #1f2126;
+  --v-hairline-strong: #2c2e35;
   --v-focus-ring: #8b93ff;
-
-  --v-scrim: #07091499;
-  --v-shadow: 0 22px 50px rgb(6 8 20 / 0.45);
+  --v-scrim: #000000d9;
+  --v-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 32px 80px -48px rgba(0, 0, 0, 0.85);
+  --v-skeleton-base: #141416;
+  --v-skeleton-shine: #ffffff10;
 }
 
-/* ─── Tailwind Theme Integration ───────────────────────────────────────────── */
 @theme inline {
   --color-canvas: var(--v-canvas);
   --color-surface-1: var(--v-surface-1);
@@ -53,11 +54,16 @@
   --color-accent-subtle: var(--v-accent-subtle);
   --color-accent-glow: var(--v-accent-glow);
   --color-accent-bright: var(--v-accent-bright);
+  --color-accent-soft: var(--v-accent-soft);
 
   --color-ink: var(--v-ink);
+  --color-ink-soft: var(--v-ink-soft);
   --color-ink-muted: var(--v-ink-muted);
   --color-ink-dimmed: var(--v-ink-dimmed);
 
+  --color-leaf: var(--v-leaf);
+  --color-leaf-bright: var(--v-leaf-bright);
+  --color-leaf-subtle: var(--v-leaf-subtle);
   --color-valley-deep: var(--v-valley-deep);
   --color-valley-deep-subtle: var(--v-valley-deep-subtle);
   --color-valley: var(--v-valley);
@@ -66,26 +72,22 @@
   --color-hill-subtle: var(--v-hill-subtle);
   --color-peak: var(--v-peak);
   --color-peak-subtle: var(--v-peak-subtle);
-  --color-leaf: var(--v-leaf);
 
   --color-hairline: var(--v-hairline);
   --color-hairline-strong: var(--v-hairline-strong);
   --color-focus-ring: var(--v-focus-ring);
-
   --color-scrim: var(--v-scrim);
 
   --font-sans: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
 
-  /* Rounded scale */
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-pill: 9999px;
 }
 
-/* ─── Base ─────────────────────────────────────────────────────────────────── */
 @layer base {
   html {
     font-family: var(--font-sans);
@@ -93,14 +95,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    background: var(--v-canvas);
+    color: var(--v-ink);
   }
 
   body {
     min-height: 100dvh;
+    background: var(--v-canvas);
     color: var(--v-ink);
-    background:
-      radial-gradient(920px 460px at 50% -120px, #8b93ff38, transparent 62%),
-      var(--v-canvas);
   }
 
   :focus-visible {
@@ -114,69 +116,55 @@
   }
 }
 
-/* ─── Typography Utilities ─────────────────────────────────────────────────── */
 @layer utilities {
   .type-hero {
-    font-size: 2.25rem;
+    font-size: clamp(40px, 7vw, 80px);
     font-weight: 600;
-    line-height: 1.08;
-    letter-spacing: -0.035em;
+    line-height: 1.05;
+    letter-spacing: -1.6px;
   }
-  @media (min-width: 1024px) {
+  @media (min-width: 768px) {
     .type-hero {
-      font-size: 3.25rem;
+      letter-spacing: -3px;
     }
   }
 
   .type-display-xl {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    font-feature-settings: "tnum", "ss01";
-  }
-  @media (min-width: 1024px) {
-    .type-display-xl {
-      font-size: 3rem;
-    }
+    font-size: clamp(32px, 4.5vw, 56px);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
   }
 
   .type-display-lg {
-    font-size: 1.75rem;
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-  }
-  @media (min-width: 1024px) {
-    .type-display-lg {
-      font-size: 2rem;
-    }
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -1px;
   }
 
-  .type-display-md {
-    font-size: 1.375rem;
+  .type-display {
+    font-size: 1.75rem;
     font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
+    line-height: 1.15;
+    letter-spacing: -0.6px;
   }
 
   .type-heading {
     font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.3;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.2px;
   }
 
   .type-body {
     font-size: 0.9375rem;
     line-height: 1.6;
-    letter-spacing: -0.01em;
   }
 
   .type-body-sm {
     font-size: 0.8125rem;
     line-height: 1.5;
-    letter-spacing: -0.005em;
   }
 
   .type-caption {
@@ -188,29 +176,28 @@
     font-size: 0.6875rem;
     font-weight: 600;
     line-height: 1.2;
-    letter-spacing: 0.07em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
-  /* Metric family — tabular numerals mandatory */
   .type-metric-xl {
     font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.0;
-    letter-spacing: -0.03em;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -1px;
     font-feature-settings: "tnum", "ss01";
   }
-  @media (min-width: 1024px) {
+  @media (min-width: 768px) {
     .type-metric-xl {
-      font-size: 3rem;
+      font-size: 2.5rem;
     }
   }
 
   .type-metric-lg {
-    font-size: 1.75rem;
+    font-size: 1.625rem;
     font-weight: 600;
-    line-height: 1.0;
-    letter-spacing: -0.02em;
+    line-height: 1;
+    letter-spacing: -0.8px;
     font-feature-settings: "tnum", "ss01";
   }
 
@@ -218,7 +205,6 @@
     font-size: 1.125rem;
     font-weight: 500;
     line-height: 1.2;
-    letter-spacing: -0.01em;
     font-feature-settings: "tnum", "ss01";
   }
 
@@ -226,57 +212,55 @@
     font-size: 0.9375rem;
     font-weight: 500;
     line-height: 1.2;
-    letter-spacing: -0.01em;
     font-feature-settings: "tnum", "ss01";
   }
 
   .type-button {
     font-size: 0.875rem;
     font-weight: 500;
-    line-height: 1.0;
-    letter-spacing: -0.01em;
+    line-height: 1;
   }
 
   .type-button-sm {
     font-size: 0.8125rem;
     font-weight: 500;
-    line-height: 1.0;
+    line-height: 1;
   }
 
-  /* Relief background classes for energy data bars */
-  .bg-relief-valley-deep {
-    background-color: var(--v-valley-deep);
-  }
-  .bg-relief-valley {
-    background-color: var(--v-valley);
-  }
-  .bg-relief-plain {
-    background-color: var(--v-plain);
-  }
-  .bg-relief-hill {
-    background-color: var(--v-hill);
-  }
-  .bg-relief-peak {
-    background-color: var(--v-peak);
-  }
-
-  /* Utility: tabular nums */
   .tabular-nums {
     font-feature-settings: "tnum", "ss01";
   }
 
-  /* Scrim overlay for bottom sheets/modals */
   .scrim {
     background-color: var(--v-scrim);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
   }
 
   .shadow-lift {
     box-shadow: var(--v-shadow);
   }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    border: 1px solid var(--v-hairline);
+    background: var(--v-surface-2);
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    color: var(--v-ink-soft);
+  }
+
+  .panel {
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--v-hairline);
+    background: var(--v-surface-1);
+    box-shadow: var(--v-shadow);
+  }
 }
 
-/* ─── Scrollbar styling ────────────────────────────────────────────────────── */
 @layer base {
   ::-webkit-scrollbar {
     width: 6px;
@@ -289,12 +273,8 @@
     background: var(--v-hairline-strong);
     border-radius: 9999px;
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--v-ink-dimmed);
-  }
 }
 
-/* ─── Animations ───────────────────────────────────────────────────────────── */
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
@@ -302,16 +282,13 @@
   .animate-slide-up {
     animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .animate-pulse-subtle {
-    animation: pulseSubtle 2s ease-in-out infinite;
-  }
-
   .skeleton-shimmer {
+    background-color: var(--v-skeleton-base);
     background-image: linear-gradient(
       90deg,
-      var(--v-surface-3) 0%,
-      #ffffff22 48%,
-      var(--v-surface-3) 100%
+      var(--v-skeleton-base) 0%,
+      var(--v-skeleton-shine) 48%,
+      var(--v-skeleton-base) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.35s ease-in-out infinite;
@@ -322,19 +299,81 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
-
-@keyframes pulseSubtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
 @keyframes shimmer {
   0% { background-position: 100% 0; }
   100% { background-position: -100% 0; }
 }
 
+/* ─── Marca: collar LED, rayo, parpadeo, orejas ────────────────────────────── */
+
+.volty-anim .tag-ring {
+  transform-origin: 60px 103px;
+  opacity: 0;
+  animation: volty-tring 3.6s ease-out infinite;
+}
+.volty-anim .bolt-g {
+  animation: volty-flick 3.6s infinite;
+}
+.volty-anim .led {
+  animation: volty-led 3.6s ease-in-out infinite;
+}
+.volty-anim .eyes {
+  animation: volty-blink 4.5s infinite;
+}
+.volty-think .ear-l {
+  transform-origin: 40px 52px;
+  animation: volty-wagl 0.7s ease-in-out infinite;
+}
+.volty-think .ear-r {
+  transform-origin: 80px 52px;
+  animation: volty-wagr 0.7s ease-in-out infinite;
+}
+.price-bar {
+  animation: volty-grow 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.caret-blink {
+  animation: volty-caret 1s steps(1) infinite;
+}
+
+@keyframes volty-tring {
+  0%, 45% { opacity: 0; transform: scale(0.9); }
+  55% { opacity: 0.9; }
+  100% { opacity: 0; transform: scale(2.1); }
+}
+@keyframes volty-flick {
+  0%, 45%, 100% { filter: none; }
+  52% { filter: drop-shadow(0 0 3px #b9c0ff); }
+}
+@keyframes volty-led {
+  50% { opacity: 0.45; }
+}
+@keyframes volty-blink {
+  0%, 94%, 100% { transform: scaleY(1); }
+  97% { transform: scaleY(0.1); }
+}
+@keyframes volty-wagl {
+  50% { transform: rotate(-6deg); }
+}
+@keyframes volty-wagr {
+  50% { transform: rotate(6deg); }
+}
+@keyframes volty-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes volty-caret {
+  50% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

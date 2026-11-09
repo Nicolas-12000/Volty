@@ -10,9 +10,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Volty — Optimiza tu energía",
+  title: "Volty — Precios reales para decidir cuándo consumir",
   description:
-    "Volty planifica cargas con precios reales. MATIAS interpreta en lenguaje natural; el optimizador arma el horario.",
+    "Dile a MATIAS qué necesitas y planifica tu hogar en los valles del mercado. Precios day-ahead DE-LU cada 15 minutos.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

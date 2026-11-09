@@ -2,11 +2,8 @@
 
 const PUBLIC_EXACT = new Set(["/", ""]);
 
-/** Inicio = dashboard de mercado (API pública). /hogar = dashboard personal (JWT). */
+const PUBLIC_PREFIXES = ["/entrar", "/registro", "/analytics"] as const;
 
-const PUBLIC_PREFIXES = ["/entrar", "/analytics"] as const;
-
-/** Rutas legacy que redirigen al inicio público. */
 const LEGACY_PUBLIC = ["/dashboard"] as const;
 
 export function isPublicPath(path: string): boolean {
