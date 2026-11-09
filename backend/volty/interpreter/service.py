@@ -59,8 +59,9 @@ def parse_natural_language(request: NaturalLanguageRequest) -> ParsedIntent:
         raise ValueError("Mensaje vacío.")
 
     rules = _rule_based_parse(_fold(raw), request.context_load_name)
+    if len(rules.loads) >= 2:
+        return rules
     gemini = parse_intent_with_gemini(raw)
-    # Gemini a veces devuelve solo la primera carga. Si las reglas vieron más aparatos, esas ganan.
     if gemini and len(gemini.loads) >= len(rules.loads):
         return gemini
     return rules

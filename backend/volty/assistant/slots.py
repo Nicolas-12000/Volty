@@ -38,15 +38,24 @@ def extract_intent(state: ThreadState, context_load_name: str | None) -> ParsedI
 
 
 def friendly_summary(intent: ParsedIntent) -> str:
+    pref = intent.preferences
+    obj = (
+        f"coste + renovables (~{pref.renewable_weight:.0%} verde)"
+        if pref.objective.value == "balance_cost_renewables"
+        else "minimizar coste"
+    )
     lines = [
         intent.explanation,
+        f"Objetivo del plan: {obj}.",
         "",
         f"Borrador ({len(intent.loads)} carga{'s' if len(intent.loads) != 1 else ''}):",
     ]
     for load in intent.loads:
+        extra = " (sin pausas)" if load.must_run else ""
         lines.append(
             f"• {load.name} — {load.energy_kwh:g} kWh, máx. {load.max_power_kw:g} kW, "
-            f"antes de {load.deadline.strftime('%H:%M')}"
+            f"antes de {load.deadline.strftime('%H:%M')}{extra}"
         )
-    lines.append("Revisa el borrador abajo; puedes editarlo antes de guardar.")
+    lines.append("")
+    lines.append("Nada crítico pendiente: revisa el panel del borrador y lanza el optimizador cuando cuadre.")
     return "\n".join(lines)
