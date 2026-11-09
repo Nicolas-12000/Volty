@@ -4,10 +4,10 @@ Repo: **https://github.com/Nicolas-12000/Volty**
 
 | Evento | Qué hace |
 |--------|-----------|
-| `git push` a `main` (backend/infra/scripts) | **CI** + **Deploy AWS** automático (Lambda + CFN + migraciones). Requiere secrets en GitHub. |
-| `git push` solo `frontend/**` o docs | Solo **CI**; API no se reconstruye (no hubo cambios backend). |
-| **Actions → Deploy AWS** (manual) | Igual que arriba; desmarca *Desplegar* si solo quieres validar sin tocar AWS. |
-| Front CloudFront | Siempre en tu PC: `./scripts/deploy-frontend.sh` (no está en GitHub Actions). |
+| `git push` a `main` (backend/infra/scripts) | **CI** + **Deploy AWS**: Lambda + migraciones; si además cambió el front o la API se desplegó, también **S3 + CloudFront**. |
+| `git push` solo `frontend/**` | **CI** + job **frontend** del workflow (API sin rebuild, bundle nuevo en CloudFront). |
+| **Actions → Deploy AWS** (manual) | API y/o front según checks; desmarca *Desplegar* para solo validar builds. |
+| Front local de urgencia | `./scripts/deploy-frontend.sh` (mismo script que usa GitHub). |
 
 ---
 
@@ -98,14 +98,25 @@ Tarda ~10–15 min si toca CFN; si solo cambió el zip a veces es más rápido.
 
 ---
 
-## 5. Front (obligatorio aparte)
+## 5. Front (CloudFront)
 
-GitHub **no** publica el front. En tu máquina:
+Con un push que toque `frontend/**`, o tras desplegar la API en el mismo workflow, GitHub ejecuta `./scripts/deploy-frontend.sh` (lee la Function URL del stack `volty`).
+
+**Variable `CORS_ORIGINS`:** debe incluir tu CloudFront, o el navegador bloqueará las llamadas a la API:
+
+```text
+http://localhost:3000,http://127.0.0.1:3000,https://TU_DISTRIBUCION.cloudfront.net
+```
+
+Tras cambiar el dominio CloudFront, actualiza la variable y vuelve a lanzar **Deploy AWS** (job API).
+
+**Solo en tu PC** (si no quieres esperar Actions):
 
 ```bash
 export AWS_PROFILE=volty-deploy AWS_DEFAULT_REGION=eu-central-1
-# Tras deploy-aws.sh, CFN imprime FunctionUrl; úsala en VOLTY_API_URL (con /api al final)
-export VOLTY_API_URL='https://TU-FUNCTION-URL.lambda-url.eu-central-1.on.aws/api'
+API=$(aws cloudformation describe-stacks --stack-name volty \
+  --query "Stacks[0].Outputs[?OutputKey=='ApiBaseUrl'].OutputValue" --output text)
+export VOLTY_API_URL="${API%/}/api"
 ./scripts/deploy-frontend.sh
 ```
 

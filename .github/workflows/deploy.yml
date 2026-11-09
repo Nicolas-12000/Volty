@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "backend/**"
+      - "frontend/**"
       - "infra/**"
       - "scripts/**"
       - ".github/workflows/deploy.yml"
@@ -12,6 +13,10 @@ on:
     inputs:
       apply:
         description: "Desplegar stack volty (si no, solo validación + build)"
+        type: boolean
+        default: true
+      deploy_frontend:
+        description: "Publicar front (S3 + CloudFront)"
         type: boolean
         default: true
 
@@ -23,7 +28,31 @@ permissions:
   contents: read
 
 jobs:
-  deploy:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'backend/**'
+              - 'infra/**'
+              - 'scripts/**'
+              - '.github/workflows/deploy.yml'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/deploy.yml'
+
+  api:
+    needs: changes
+    if: |
+      needs.changes.outputs.api == 'true' &&
+      (github.event_name == 'push' || inputs.apply)
     runs-on: ubuntu-latest
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
@@ -51,16 +80,13 @@ jobs:
             infra/cloudformation/volty.yaml \
             infra/cloudformation/volty-cdn.yaml
 
-      - name: Configure AWS credentials
-        if: github.event_name == 'push' || inputs.apply
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: CloudFormation deploy
-        if: github.event_name == 'push' || inputs.apply
+      - name: CloudFormation deploy (API)
         env:
           JWT_SECRET: ${{ secrets.VOLTY_JWT_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -87,3 +113,43 @@ jobs:
             --query "Stacks[0].Outputs[?OutputKey=='MigrateFunctionName'].OutputValue" --output text)
           aws lambda invoke --function-name "$MIGRATE" /tmp/migrate.json
           cat /tmp/migrate.json
+
+  frontend:
+    needs: [changes, api]
+    if: |
+      (github.event_name == 'push' || (inputs.apply && inputs.deploy_frontend)) &&
+      (needs.changes.outputs.frontend == 'true' || needs.api.result == 'success') &&
+      (needs.api.result == 'success' || needs.api.result == 'skipped')
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Front estático → S3 + CloudFront
+        run: |
+          set -euo pipefail
+          API_BASE=$(aws cloudformation describe-stacks --stack-name volty \
+            --query "Stacks[0].Outputs[?OutputKey=='ApiBaseUrl'].OutputValue" --output text)
+          export VOLTY_API_URL="${API_BASE%/}/api"
+          echo "VOLTY_API_URL=$VOLTY_API_URL"
+          unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
+          ./scripts/deploy-frontend.sh
+
+      - name: URL del front
+        run: |
+          DOMAIN=$(aws cloudformation describe-stacks --stack-name volty-cdn \
+            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDomain'].OutputValue" --output text)
+          echo "::notice::Front publicado: https://${DOMAIN}"
