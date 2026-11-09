@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { ButtonLink, TextLink } from "@/components/ui/button-link";
 import { PriceChart } from "@/components/market/price-chart";
 import { PlanCard } from "@/components/home/plan-card";
@@ -33,6 +34,7 @@ export function Dashboard() {
     renewableDays,
     loading,
     error,
+    reload,
     biddingZone,
     intervalMinutes,
   } = usePrices();
@@ -47,7 +49,9 @@ export function Dashboard() {
   const live = day === 0 ? todayPoints : tomorrowPoints;
   const prices = live.map((p) => p.price_eur_per_mwh);
   const hasPrices = prices.length > 0;
-  const marketPending = loading || !hasPrices;
+  const todayReady = todayPoints.length > 0;
+  const marketPending = loading;
+  const dayEmpty = !loading && !hasPrices;
   const plan = useMemo(() => localPlan(prices), [prices]);
 
   const mn = hasPrices ? Math.min(...prices) : 0;
@@ -58,7 +62,7 @@ export function Dashboard() {
   const dayStamp = live[0]?.timestamp;
   const liveRenew = dayStamp ? renewableDays[berlinDayKey(dayStamp)] : undefined;
   const rn = liveRenew && liveRenew > 0 ? Math.round(liveRenew) : null;
-  const renewPending = marketPending || rn == null;
+  const renewPending = loading;
 
   const minIdx = hasPrices ? prices.indexOf(mn) : -1;
   const maxIdx = hasPrices ? prices.indexOf(mx) : -1;
@@ -126,13 +130,17 @@ export function Dashboard() {
           {biddingZone} · {intervalMinutes} min
         </span>
         <span className="flex-1" />
-        {hasPrices && !error ? (
+        {loading ? (
+          <span className="chip text-ink-dimmed">Consultando mercado…</span>
+        ) : error && !todayReady ? (
+          <span className="chip text-ink-dimmed">No llegamos al mercado</span>
+        ) : todayReady ? (
           <span className="chip">
             <span className="size-1.5 rounded-full bg-leaf shadow-[0_0_0_3px_rgba(39,166,68,.22)]" />
             Precios al día
           </span>
         ) : (
-          <span className="chip text-ink-dimmed">{loading ? "Consultando mercado…" : "Esperando mercado"}</span>
+          <span className="chip text-ink-dimmed">Sin precios todavía</span>
         )}
         <ButtonLink href="/analytics" variant="secondary" size="sm" className="bg-canvas text-ink-soft hover:bg-surface-2 hover:text-ink">
           Analítica SMARD
@@ -142,6 +150,14 @@ export function Dashboard() {
       <div className="grid grid-cols-2 border-b border-hairline lg:grid-cols-4">
         {marketPending ? (
           <DashboardKpiSkeleton />
+        ) : dayEmpty ? (
+          <div className="col-span-2 px-5 py-5 lg:col-span-4">
+            <p className="text-sm text-ink-muted">
+              {day === 1
+                ? "Los precios de mañana salen hacia mediodía. Hasta entonces puedes mirar los de hoy."
+                : "Todavía no tenemos los precios de hoy. Prueba otra vez en un momento."}
+            </p>
+          </div>
         ) : (
           kpis.map((k, i) => (
             <div
@@ -164,12 +180,37 @@ export function Dashboard() {
         )}
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_300px]">
-        <div className="px-5 pb-4 pt-5">
-          {marketPending ? <DashboardChartSkeleton /> : <PriceChart prices={prices} planIdx={plan.idx} nowSlot={ns} />}
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_min(18rem,32%)] lg:items-stretch">
+        <div className="flex min-h-128 flex-col px-5 pb-5 pt-5">
+          {marketPending ? (
+            <DashboardChartSkeleton />
+          ) : dayEmpty ? (
+            <DayEmptyState
+              day={day}
+              todayReady={todayReady}
+              error={error}
+              onShowToday={() => setDay(0)}
+              onReload={reload}
+            />
+          ) : (
+            <PriceChart key={day} prices={prices} planIdx={plan.idx} nowSlot={ns} />
+          )}
         </div>
-        <aside id="matias-plan" className="border-t border-hairline bg-canvas p-5 lg:border-l lg:border-t-0">
-          {marketPending ? <DashboardPlanSkeleton /> : <PlanCard plan={plan} />}
+        <aside
+          id="matias-plan"
+          className="flex min-h-128 flex-col border-t border-hairline bg-canvas p-5 lg:min-h-0 lg:border-l lg:border-t-0"
+        >
+          {marketPending ? (
+            <DashboardPlanSkeleton />
+          ) : dayEmpty ? (
+            <p className="text-sm text-ink-muted">
+              {day === 1
+                ? "Cuando salgan los precios de mañana, aquí te diremos el mejor momento para cargar."
+                : "Sin precios no podemos armar un horario. Prueba de nuevo en un rato."}
+            </p>
+          ) : (
+            <PlanCard plan={plan} />
+          )}
         </aside>
       </div>
 
@@ -178,13 +219,19 @@ export function Dashboard() {
           <h3 className="text-[15px] font-semibold tracking-[-0.2px] text-ink">Mix renovable</h3>
           {renewPending ? (
             <DashboardRenewableSkeleton />
-          ) : (
+          ) : rn != null ? (
             <>
               <div className="mt-4 flex h-2.5 overflow-hidden rounded-full bg-surface-3">
                 <i style={{ width: `${rn}%` }} className="bg-accent-bright" />
               </div>
               <p className="mt-3 text-sm text-ink-muted">{rn}% del mix</p>
             </>
+          ) : (
+            <p className="mt-3 text-sm text-ink-muted">
+              {dayEmpty && day === 1
+                ? "El mix renovable de mañana llega junto con los precios."
+                : "Hoy no tenemos el porcentaje de renovables."}
+            </p>
           )}
         </div>
         <div className="p-5">
@@ -227,6 +274,45 @@ export function Dashboard() {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function DayEmptyState({
+  day,
+  todayReady,
+  error,
+  onShowToday,
+  onReload,
+}: {
+  day: DayTab;
+  todayReady: boolean;
+  error: string;
+  onShowToday: () => void;
+  onReload: () => void;
+}) {
+  return (
+    <div className="flex h-full min-h-88 flex-col justify-center rounded-md border border-dashed border-hairline px-5 py-6">
+      <p className="text-[15px] font-semibold tracking-[-0.2px] text-ink">
+        {day === 1 ? "Mañana todavía no tiene precios" : "Aún no hay precios de hoy"}
+      </p>
+      <p className="mt-2 max-w-md text-sm text-ink-muted">
+        {error
+          ? error
+          : day === 1
+            ? "Suelen publicarse hacia mediodía, hora de Alemania. No se está cargando nada: simplemente aún no hay curva. Mientras tanto, mira el día de hoy."
+            : "No hemos podido cargar los precios de hoy. Prueba otra vez en un momento."}
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {day === 1 && todayReady ? (
+          <Button type="button" size="sm" onClick={onShowToday}>
+            Ver hoy
+          </Button>
+        ) : null}
+        <Button type="button" variant="secondary" size="sm" onClick={onReload}>
+          Consultar de nuevo
+        </Button>
       </div>
     </div>
   );

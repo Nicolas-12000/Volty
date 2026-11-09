@@ -36,8 +36,8 @@ const BAR_HEIGHTS = [
 
 export function DashboardChartSkeleton() {
   return (
-    <div className="space-y-3" aria-hidden="true">
-      <div className="flex h-52 items-end gap-px sm:gap-0.5">
+    <div className="flex h-full min-h-88 flex-col space-y-3" aria-hidden="true">
+      <div className="flex min-h-88 flex-1 items-end gap-px sm:gap-0.5">
         {BAR_HEIGHTS.map((h, i) => (
           <div
             key={i}
@@ -57,28 +57,25 @@ export function DashboardChartSkeleton() {
 
 export function DashboardPlanSkeleton() {
   return (
-    <div className="space-y-3" aria-hidden="true">
+    <div className="flex h-full min-h-88 flex-col gap-4" aria-hidden="true">
       <div className="flex items-center gap-3">
-        <Skeleton className="size-10 shrink-0 rounded-full" />
+        <Skeleton className="size-11 shrink-0 rounded-full" />
         <div className="flex-1 space-y-2">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-3 w-28" />
         </div>
       </div>
-      <Skeleton className="h-14 w-full rounded-md" />
-      {[0, 1, 2, 3].map((i) => (
-        <PlanRowSkeleton key={i} />
-      ))}
-      <Skeleton className="h-20 w-full rounded-md" />
-    </div>
-  );
-}
-
-function PlanRowSkeleton() {
-  return (
-    <div className="flex justify-between gap-4 border-b border-hairline py-2">
-      <Skeleton className="h-3.5 w-20" />
-      <Skeleton className="h-3.5 w-28" />
+      <Skeleton className="h-10 w-full rounded-md" />
+      <div className="flex flex-1 flex-col gap-2">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-9 w-full rounded-md" />
+        ))}
+      </div>
+      <div className="mt-auto grid grid-cols-2 gap-2">
+        <Skeleton className="h-14 rounded-md" />
+        <Skeleton className="h-14 rounded-md" />
+      </div>
+      <Skeleton className="h-24 w-full rounded-lg" />
     </div>
   );
 }

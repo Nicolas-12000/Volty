@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { berlinDayKey, formatBerlinDateTimeLocal } from "@/lib/format";
+import { berlinDayKey, formatBerlinDateTimeLocal, shiftBerlinDay } from "@/lib/format";
 
 export type ClientClock = {
   nowIso: string;
@@ -16,16 +16,15 @@ export function useClientClock(): ClientClock | null {
 
   useEffect(() => {
     const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nowIso = now.toISOString();
     const deadline = new Date(now);
     deadline.setDate(deadline.getDate() + 1);
     deadline.setHours(7, 0, 0, 0);
 
     setClock({
-      nowIso: now.toISOString(),
-      todayKey: berlinDayKey(now.toISOString()),
-      tomorrowKey: berlinDayKey(tomorrow.toISOString()),
+      nowIso,
+      todayKey: berlinDayKey(nowIso),
+      tomorrowKey: shiftBerlinDay(nowIso, 1),
       defaultDeadlineLocal: formatBerlinDateTimeLocal(deadline),
     });
   }, []);

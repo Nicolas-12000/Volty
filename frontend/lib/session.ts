@@ -6,6 +6,7 @@ export type VoltyUser = {
 
 const TOKEN_KEY = "volty.access_token";
 
+import { friendlyError } from "./friendly-errors";
 import { apiBase } from "./http";
 
 const API = apiBase();
@@ -32,7 +33,8 @@ export async function login(email: string, password: string): Promise<VoltyUser>
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(typeof body.detail === "string" ? body.detail : "No se pudo iniciar sesión.");
+    const detail = typeof body.detail === "string" ? body.detail : undefined;
+    throw new Error(friendlyError(detail, "No pudimos iniciar sesión. Revisa correo y contraseña."));
   }
   setAccessToken(body.access_token);
   return body.user as VoltyUser;
@@ -41,13 +43,18 @@ export async function login(email: string, password: string): Promise<VoltyUser>
 export async function fetchCurrentUser(): Promise<VoltyUser | null> {
   const token = getAccessToken();
   if (!token) return null;
-  const res = await fetch(`${API}/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
-  });
-  if (!res.ok) {
+  try {
+    const res = await fetch(`${API}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      clearSession();
+      return null;
+    }
+    return (await res.json()) as VoltyUser;
+  } catch {
     clearSession();
     return null;
   }
-  return (await res.json()) as VoltyUser;
 }

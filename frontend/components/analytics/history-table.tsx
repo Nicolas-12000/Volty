@@ -9,9 +9,9 @@ export function HistoryTable({ entries }: HistoryTableProps) {
   if (!entries.length) {
     return (
       <div className="rounded-2xl border border-hairline bg-surface-1 p-8 text-center">
-        <p className="text-[15px] font-semibold">Sin historial todavía</p>
+        <p className="text-[15px] font-semibold">Todavía no hay horarios guardados</p>
         <p className="mt-2 text-sm text-ink-muted">
-          Las optimizaciones que calcules desde Cargas aparecerán aquí en este dispositivo.
+          Cuando calcules un plan desde Cargas, aparecerá aquí en este dispositivo.
         </p>
       </div>
     );

@@ -12,6 +12,7 @@ export type UsePricesReturn = {
   renewableDays: Record<string, number>;
   loading: boolean;
   error: string;
+  reload: () => void;
   updatedAt: string;
   todayPoints: PricePoint[];
   tomorrowPoints: PricePoint[];
@@ -29,9 +30,13 @@ export function usePrices(): UsePricesReturn {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState("");
+  const [reloadTick, setReloadTick] = useState(0);
+
+  const reload = useCallback(() => setReloadTick((n) => n + 1), []);
 
   useEffect(() => {
     let cancelled = false;
+    setFetching(true);
     void (async () => {
       const [series, ren] = await Promise.all([
         fetchPrices().catch((e: unknown) => {
@@ -47,6 +52,7 @@ export function usePrices(): UsePricesReturn {
         setPrices(series.points);
         setIntervalMinutes(series.interval_minutes);
         setBiddingZone(series.bidding_zone);
+        setError("");
       }
       setRenewableDays(ren.days);
       setFetching(false);
@@ -54,7 +60,7 @@ export function usePrices(): UsePricesReturn {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadTick]);
 
   useEffect(() => {
     if (!clock?.nowIso) return;
@@ -92,6 +98,7 @@ export function usePrices(): UsePricesReturn {
     renewableDays,
     loading: fetching || !clock,
     error,
+    reload,
     updatedAt,
     todayPoints,
     tomorrowPoints,

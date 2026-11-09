@@ -11,16 +11,18 @@ import { useLoads } from "@/hooks/use-loads";
 import { useSession } from "@/providers/session-provider";
 
 export default function HogarPage() {
-  const { user } = useSession();
+  const { user, status } = useSession();
   const { loads } = useLoads();
   const [summary, setSummary] = useState<MeSummary | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (status !== "authenticated") return;
+    setError("");
     void fetchMeSummary()
       .then(setSummary)
-      .catch((e: unknown) => setError(e instanceof Error ? e.message : "No se cargó tu hogar."));
-  }, []);
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "No pudimos cargar tu hogar."));
+  }, [status]);
 
   return (
     <AppShell

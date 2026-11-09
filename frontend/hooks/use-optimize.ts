@@ -34,7 +34,7 @@ export function useOptimize() {
         setError(
           msg.includes("Imposible") || msg.includes("kW")
             ? msg
-            : "No se pudo calcular el plan. Reintenta.",
+            : "No pudimos calcular el plan. Espera un momento y vuelve a intentar.",
         );
         return null;
       } finally {

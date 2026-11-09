@@ -37,11 +37,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const refresh = useCallback(async () => {
-    const me = await fetchCurrentUser();
-    if (me) {
-      setUser(me);
-      setStatus("authenticated");
-    } else {
+    try {
+      const me = await fetchCurrentUser();
+      if (me) {
+        setUser(me);
+        setStatus("authenticated");
+      } else {
+        setUser(null);
+        setStatus("unauthenticated");
+      }
+    } catch {
       setUser(null);
       setStatus("unauthenticated");
     }

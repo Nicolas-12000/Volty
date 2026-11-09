@@ -1,4 +1,5 @@
 import { authHeaders } from "./api-auth";
+import { friendlyError } from "./friendly-errors";
 import { apiBase } from "./http";
 import type { VoltyUser } from "./session";
 
@@ -244,7 +245,7 @@ async function readError(res: Response): Promise<string> {
   } catch {
     /* body is not JSON */
   }
-  return text || "La petición falló.";
+  return friendlyError(text, "Algo salió mal. Vuelve a intentarlo en unos segundos.");
 }
 
 export async function optimize(
@@ -276,12 +277,13 @@ export type SmardSeriesResponse = {
   filter_name: string;
   region: string;
   resolution: string;
+  unit?: string;
   points: SmardPoint[];
   source: string;
 };
 
 export async function fetchSmardSeries(filterId: number): Promise<SmardSeriesResponse> {
   const res = await fetch(`${API}/smard/series?filter_id=${filterId}`);
-  if (!res.ok) throw new Error("Error obteniendo datos de SMARD");
+  if (!res.ok) throw new Error("No pudimos cargar esta serie. Prueba otra o vuelve en un momento.");
   return res.json();
 }

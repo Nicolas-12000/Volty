@@ -124,7 +124,7 @@ export function MatiasChat({ className }: { className?: string }) {
           }
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "No se cargaron los chats.");
+        if (!cancelled) setError(err instanceof Error ? err.message : "No pudimos cargar tus conversaciones.");
       } finally {
         if (!cancelled) setThreadsLoading(false);
       }
@@ -186,7 +186,7 @@ export function MatiasChat({ className }: { className?: string }) {
     try {
       await patchMatiasDraft(threadId, draft);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se guardó el borrador.");
+      setError(err instanceof Error ? err.message : "No pudimos guardar el borrador.");
     } finally {
       setDraftSaving(false);
     }

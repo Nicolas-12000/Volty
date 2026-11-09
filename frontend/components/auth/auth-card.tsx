@@ -34,7 +34,7 @@ export function AuthCard({
       await login(email.trim(), password);
       router.replace(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al entrar");
+      setError(err instanceof Error ? err.message : "No pudimos iniciar sesión.");
     } finally {
       setPending(false);
     }
@@ -102,9 +102,11 @@ export function AuthCard({
             </Button>
           </form>
 
-          <p className="mt-6 text-xs text-ink-dimmed">
-            Demo local: <span className="text-ink-muted">demo@volty.dev</span> · contraseña{" "}
-            <span className="text-ink-muted">valle-0700</span>
+          <p className="mt-6 rounded-lg border border-hairline bg-canvas/60 px-3 py-2 text-xs text-ink-muted">
+            <span className="font-medium text-ink">Cuenta para la presentación</span>
+            <br />
+            Correo <span className="text-ink">demo@volty.dev</span> · contraseña{" "}
+            <span className="text-ink">valle-0700</span>
           </p>
         </div>
       </main>
