@@ -237,7 +237,7 @@ export function MatiasChat({ className }: { className?: string }) {
         </div>
 
         <div className="border-t border-hairline p-4">
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
             <textarea
               rows={2}
               value={draftInput}
@@ -249,9 +249,16 @@ export function MatiasChat({ className }: { className?: string }) {
                 }
               }}
               placeholder="Ej.: mañana el coche 38 kwh para las 7"
-              className="min-h-11 flex-1 resize-none rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-ink placeholder:text-ink-dimmed focus:border-hairline-strong focus:outline-none"
+              className="min-h-11 flex-1 resize-none rounded-md border border-hairline bg-canvas px-4 py-3 text-[15px] leading-normal text-ink placeholder:text-ink-dimmed focus:border-hairline-strong focus:outline-none"
             />
-            <Button type="button" onClick={() => void send()} disabled={!draftInput.trim() || loading} loading={loading}>
+            <Button
+              type="button"
+              size="lg"
+              className="w-full shrink-0 sm:w-auto"
+              onClick={() => void send()}
+              disabled={!draftInput.trim() || loading}
+              loading={loading}
+            >
               Enviar
             </Button>
           </div>
