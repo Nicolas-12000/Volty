@@ -4,17 +4,18 @@ on:
   workflow_dispatch:
     inputs:
       apply:
-        description: "Ejecutar terraform apply (si no, solo plan)"
+        description: "Desplegar stack volty (si no, solo validación + build)"
         type: boolean
         default: false
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,42 +23,53 @@ jobs:
         with:
           python-version: "3.12"
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - uses: hashicorp/setup-terraform@v3
-
-      - name: Backend test + Lambda zips
+      - name: Backend test + Lambda zip
         run: |
           cd backend
           python -m venv .venv
           .venv/bin/pip install -r requirements-dev.txt
           .venv/bin/pytest -q
           cd ..
-          ./scripts/build-lambdas.sh
+          VOLTY_SKIP_TESTS=1 ./scripts/build-lambda-api.sh
 
-      - name: Terraform init
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
-        run: terraform -chdir=infra/terraform init -input=false
+      - name: Validate CloudFormation
+        run: |
+          pip install cfn-lint
+          cfn-lint infra/cloudformation/volty.yaml
 
-      - name: Terraform plan
-        env:
-          AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
-          TF_VAR_jwt_secret: ${{ secrets.TF_VAR_JWT_SECRET }}
-          TF_VAR_gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-        run: terraform -chdir=infra/terraform plan -out=tfplan
+      - name: Configure AWS credentials
+        if: inputs.apply
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform apply
+      - name: CloudFormation deploy
         if: inputs.apply
         env:
-          AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}
-        run: terraform -chdir=infra/terraform apply -input=false tfplan
-
-      - name: Upload plan
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: tfplan
-          path: infra/terraform/tfplan
+          JWT_SECRET: ${{ secrets.VOLTY_JWT_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          VOLTY_DB_PASSWORD: ${{ secrets.VOLTY_DB_PASSWORD }}
+          CORS_ORIGINS: ${{ vars.CORS_ORIGINS || 'http://localhost:3000' }}
+        run: |
+          set -euo pipefail
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          BUCKET="volty-artifacts-${ACCOUNT}"
+          if ! aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
+            aws s3api create-bucket --bucket "$BUCKET" \
+              --create-bucket-configuration "LocationConstraint=$AWS_REGION"
+          fi
+          aws s3 cp infra/build/api.zip "s3://${BUCKET}/releases/api.zip"
+          export BUCKET
+          mapfile -t OVERRIDES < <(python3 scripts/gh-cfn-overrides.py)
+          aws cloudformation deploy \
+            --stack-name volty \
+            --template-file infra/cloudformation/volty.yaml \
+            --parameter-overrides "${OVERRIDES[@]}" \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --no-fail-on-empty-changeset
+          MIGRATE=$(aws cloudformation describe-stacks --stack-name volty \
+            --query "Stacks[0].Outputs[?OutputKey=='MigrateFunctionName'].OutputValue" --output text)
+          aws lambda invoke --function-name "$MIGRATE" /tmp/migrate.json
+          cat /tmp/migrate.json

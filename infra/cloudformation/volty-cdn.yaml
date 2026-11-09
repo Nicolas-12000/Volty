@@ -1,14 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Front Volty - S3 privado + CloudFront OAC.
 
+Metadata:
+  com.aws.cloudformation.Context:
+    arch: "CloudFront OAC > S3 web bucket; CORS API en stack volty (CorsOrigins)"
+
 Parameters:
   ProjectName:
     Type: String
     Default: volty
-  ApiBaseUrlForCorsHint:
-    Type: String
-    Default: ""
-    Description: Solo informativo; CORS API se define en volty-secure
 
 Resources:
   WebBucket:
@@ -77,7 +77,11 @@ Resources:
             Resource: !Sub "${WebBucket.Arn}/*"
             Condition:
               StringEquals:
-                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+                AWS:SourceArn: !Sub
+                  - "arn:${Partition}:cloudfront::${AccountId}:distribution/${DistId}"
+                  - Partition: !Ref AWS::Partition
+                    AccountId: !Ref AWS::AccountId
+                    DistId: !Ref Distribution
 
 Outputs:
   WebBucketName:

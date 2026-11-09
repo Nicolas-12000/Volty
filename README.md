@@ -93,7 +93,7 @@ make ingest            # precios Energy-Charts → DB (opcional)
 |------|--------|
 | `backend/` | API FastAPI — entorno virtual **solo** en `backend/.venv` |
 | `frontend/` | Next.js (mercado, hogar, MATIAS) |
-| `infra/cloudformation/` | AWS: free, student, prod, CDN |
+| `infra/cloudformation/` | AWS: `volty.yaml` (+ CDN opcional) |
 | `scripts/` | Build Lambda y despliegue |
 | `docs/` | [**DEPLOY.md**](docs/DEPLOY.md), arquitectura, API |
 
@@ -104,7 +104,7 @@ Guía completa: **[docs/DEPLOY.md](docs/DEPLOY.md)** · Apagar AWS: `./scripts/t
 ```bash
 export AWS_PROFILE=tu-perfil AWS_DEFAULT_REGION=eu-central-1
 cp infra/cloudformation/params.example.json infra/cloudformation/params.json
-# Rellena JwtSecret + GeminiApiKey en params.json
+# Rellena JwtSecret, GeminiApiKey y DbPassword en params.json
 ./scripts/deploy-aws.sh
 ```
 

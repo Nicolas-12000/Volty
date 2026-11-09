@@ -8,6 +8,10 @@
     "ParameterValue": ""
   },
   {
+    "ParameterKey": "DbPassword",
+    "ParameterValue": "CAMBIA-openssl-rand-base64-24-min-16-chars"
+  },
+  {
     "ParameterKey": "CorsOrigins",
     "ParameterValue": "http://localhost:3000,http://127.0.0.1:3000,https://TU-CLOUDFRONT.cloudfront.net"
   },

@@ -46,9 +46,8 @@ jobs:
           node-version: "22"
       - run: cd frontend && npm ci && npx tsc --noEmit
 
-  terraform:
+  cloudformation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - run: terraform -chdir=infra/terraform init -backend=false && terraform validate
+      - run: pip install cfn-lint && cfn-lint infra/cloudformation/volty.yaml

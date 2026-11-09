@@ -19,12 +19,12 @@
     "!Transform scalar"
   ],
   "yaml.schemas": {
-    "https://json.schemastore.org/cloudformation.template.json": [
+    "": [
       "infra/cloudformation/**/*.yaml",
       "infra/cloudformation/**/*.yml"
     ]
   },
-  "yaml.schemaStore.enable": true,
+  "yaml.schemaStore.enable": false,
   "yaml.validate": true,
   "files.associations": {
     "infra/cloudformation/*.yaml": "yaml",

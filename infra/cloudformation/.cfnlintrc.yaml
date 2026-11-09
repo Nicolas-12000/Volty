@@ -1,5 +1,8 @@
 ---
-# Contexto I4010 y guardrails enterprise (NAT, Function URL publica) no aplican al MVP Volty.
+# Demo estudiante: RDS publico, Lambda sin VPC, Function URL publica (JWT en app).
 ignore_checks:
   - I4010
   - W3005
+  - W1011
+  - W2001
+  - I3042

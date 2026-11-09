@@ -13,7 +13,7 @@ export AWS_PAGER=""
 aws_cli() { aws --profile "$PROFILE" --region "$REGION" "$@"; }
 
 ACCOUNT="$(aws_cli sts get-caller-identity --query Account --output text)"
-STACKS=(volty-student volty-free volty-prod volty-web volty-cdn)
+STACKS=(volty volty-student volty-free volty-prod volty-web volty-cdn)
 BUCKETS=("volty-artifacts-${ACCOUNT}" "volty-web-${ACCOUNT}")
 
 echo "Cuenta ${ACCOUNT} · región ${REGION}"

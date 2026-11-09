@@ -1,9 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Volty plan estudiante - RDS + MATIAS sin NAT (RDS micro, creditos edu).
+Description: Volty - unico stack demo (plan estudiante). RDS micro, Lambda sin NAT ni VPC.
 
 Metadata:
   com.aws.cloudformation.Context:
-    arch: "Lambda sin VPC (Energy-Charts/Gemini) + RDS Postgres accesible por hostname; sin NAT"
+    arch: "Function URL > Lambda sin VPC > mercado/Gemini; RDS Postgres; secretos en params o GitHub (sin Secrets Manager)"
+    must:
+      - "BackupRetentionPeriod 0 en cuenta estudiante"
+      - "Lambda Function URL CORS AllowMethods solo wildcard"
 
 Parameters:
   ProjectName:
@@ -22,19 +25,21 @@ Parameters:
     Type: String
     NoEcho: true
     Default: ""
+  DbPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 16
+    MaxLength: 128
+    Description: Contraseña maestra Postgres (openssl rand -base64 24). GitHub secret VOLTY_DB_PASSWORD.
   CorsOrigins:
     Type: CommaDelimitedList
     Default: "http://localhost:3000"
-  AdminCidr:
-    Type: String
-    Default: "0.0.0.0/0"
-    Description: CIDR permitido a 5432 en RDS (acota a tu IP/32 en demo seria)
   BackupRetentionPeriod:
     Type: Number
     Default: 0
     MinValue: 0
     MaxValue: 35
-    Description: 0 obligatorio en AWS Academy / free tier; sube en prod
+    Description: 0 para AWS Academy / créditos estudiante
 
 Resources:
   Vpc:
@@ -97,48 +102,36 @@ Resources:
   DbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: RDS Volty student Postgres from Lambda
+      GroupDescription: Postgres Volty - Lambda sin VPC por endpoint publico RDS
       VpcId: !Ref Vpc
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 5432
           ToPort: 5432
-          CidrIp: !Ref AdminCidr
-          Description: Solo demo; restringe AdminCidr a tu IP
+          CidrIp: 0.0.0.0/0
+          Description: Demo estudiante; proteger con DbPassword fuerte + cifrado en reposo
 
   DbSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Subnets públicas Volty student
+      DBSubnetGroupDescription: Subnets RDS Volty
       SubnetIds:
         - !Ref PublicSubnetA
         - !Ref PublicSubnetB
-
-  DbSecret:
-    Type: AWS::SecretsManager::Secret
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
-    Properties:
-      Description: Credencial Postgres Volty student
-      GenerateSecretString:
-        SecretStringTemplate: '{"username":"volty"}'
-        GenerateStringKey: password
-        PasswordLength: 32
-        ExcludeCharacters: '"@/\'
 
   Database:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      DBInstanceIdentifier: !Sub "${ProjectName}-student-db"
+      DBInstanceIdentifier: !Sub "${ProjectName}-db"
       Engine: postgres
       AutoMinorVersionUpgrade: true
       DBInstanceClass: db.t4g.micro
       AllocatedStorage: 20
       StorageEncrypted: true
       MasterUsername: volty
-      MasterUserPassword: !Sub "{{resolve:secretsmanager:${DbSecret}:SecretString:password}}"
+      MasterUserPassword: !Ref DbPassword
       DBName: volty
       VPCSecurityGroups:
         - !Ref DbSecurityGroup
@@ -152,7 +145,7 @@ Resources:
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "${ProjectName}-student-lambda"
+      RoleName: !Sub "${ProjectName}-lambda"
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -162,25 +155,21 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Policies:
-        - PolicyName: read-db-secret
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action: secretsmanager:GetSecretValue
-                Resource: !Ref DbSecret
 
   ApiLogGroup:
     Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${ProjectName}-api-student"
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-api"
       RetentionInDays: 7
 
   MigrateLogGroup:
     Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${ProjectName}-migrate-student"
+      LogGroupName: !Sub "/aws/lambda/${ProjectName}-migrate"
       RetentionInDays: 7
 
   ApiFunction:
@@ -188,7 +177,7 @@ Resources:
     DependsOn:
       - ApiLogGroup
     Properties:
-      FunctionName: !Sub "${ProjectName}-api-student"
+      FunctionName: !Sub "${ProjectName}-api"
       Runtime: python3.12
       Handler: handler.lambda_handler
       Timeout: 29
@@ -201,7 +190,7 @@ Resources:
         Variables:
           DATABASE_URL: !Sub
             - "postgresql+psycopg://volty:${Pw}@${Host}:5432/volty"
-            - Pw: !Sub "{{resolve:secretsmanager:${DbSecret}:SecretString:password}}"
+            - Pw: !Ref DbPassword
               Host: !GetAtt Database.Endpoint.Address
           JWT_SECRET: !Ref JwtSecret
           GEMINI_API_KEY: !Ref GeminiApiKey
@@ -218,7 +207,7 @@ Resources:
       - ApiFunction
       - MigrateLogGroup
     Properties:
-      FunctionName: !Sub "${ProjectName}-migrate-student"
+      FunctionName: !Sub "${ProjectName}-migrate"
       Runtime: python3.12
       Handler: handlers.migrate.lambda_handler
       Timeout: 120
@@ -231,7 +220,7 @@ Resources:
         Variables:
           DATABASE_URL: !Sub
             - "postgresql+psycopg://volty:${Pw}@${Host}:5432/volty"
-            - Pw: !Sub "{{resolve:secretsmanager:${DbSecret}:SecretString:password}}"
+            - Pw: !Ref DbPassword
               Host: !GetAtt Database.Endpoint.Address
 
   FunctionUrl:
@@ -242,10 +231,6 @@ Resources:
       Cors:
         AllowOrigins: !Ref CorsOrigins
         AllowMethods:
-          - DELETE
-          - GET
-          - PATCH
-          - POST
           - "*"
         AllowHeaders:
           - authorization
@@ -262,10 +247,12 @@ Resources:
 
 Outputs:
   ApiBaseUrl:
+    Description: URL base Function URL (añadir /api en el front)
     Value: !GetAtt FunctionUrl.FunctionUrl
   DatabaseEndpoint:
+    Description: Host Postgres (no uses desde internet sin VPN; contraseña en parámetro)
     Value: !GetAtt Database.Endpoint.Address
   MigrateFunctionName:
     Value: !Ref MigrateFunction
   StackMode:
-    Value: student-no-nat-postgres-public
+    Value: volty-student-unified

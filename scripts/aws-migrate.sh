@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Alembic contra RDS del stack (requiere tu IP en AdminCidrForPostgres o VPN).
 set -euo pipefail
-STACK="${1:-volty-prod}"
+STACK="${1:-volty}"
 PROFILE="${AWS_PROFILE:-volty-deploy}"
 REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
