@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PROFILE="${AWS_PROFILE:-volty-deploy}"
+PROFILE="${AWS_PROFILE:-}"
 REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
 PARAMS="${ROOT}/infra/cloudformation/params.json"
 FN="${VOLTY_API_FUNCTION:-volty-api}"
@@ -38,14 +38,22 @@ print(json.dumps({
 PY
 )"
 
+aws_cli() {
+  if [[ -n "$PROFILE" ]]; then
+    aws --profile "$PROFILE" --region "$REGION" "$@"
+  else
+    aws --region "$REGION" "$@"
+  fi
+}
+
 echo "==> CORS volty-api: $ORIGINS"
-aws --profile "$PROFILE" --region "$REGION" lambda update-function-url-config \
+aws_cli lambda update-function-url-config \
   --function-name "$FN" \
   --cors "$CORS_JSON"
 
 echo "==> prueba (debe incluir Access-Control-Allow-Origin)"
 ORIGIN="$(echo "$ORIGINS" | awk -F, '{print $NF}')"
-API="$(aws --profile "$PROFILE" --region "$REGION" lambda get-function-url-config \
+API="$(aws_cli lambda get-function-url-config \
   --function-name "$FN" --query FunctionUrl --output text)"
 API="${API%/}"
 curl -sSI -X OPTIONS "${API}/api/health" \

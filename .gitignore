@@ -20,10 +20,9 @@ node_modules/
 frontend/.next/
 frontend/out/
 infra/build/
-infra/terraform/.terraform/
-infra/terraform/*.tfstate
-infra/terraform/*.tfstate.*
-infra/terraform/terraform.tfvars
+infra/terraform/*.tfvars
+infra/terraform/*.auto.tfvars
+infra/volty-github-deploy-keys.json
 infra/cloudformation/params.json
 infra/cloudformation/params.*.json
 !infra/cloudformation/params.example.json

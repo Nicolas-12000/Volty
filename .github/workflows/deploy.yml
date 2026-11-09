@@ -35,7 +35,10 @@ jobs:
       - name: Validate CloudFormation
         run: |
           pip install cfn-lint
-          cfn-lint infra/cloudformation/volty.yaml
+          cfn-lint -c infra/cloudformation/.cfnlintrc.yaml \
+            --non-zero-exit-code error \
+            infra/cloudformation/volty.yaml \
+            infra/cloudformation/volty-cdn.yaml
 
       - name: Configure AWS credentials
         if: inputs.apply
@@ -51,7 +54,7 @@ jobs:
           JWT_SECRET: ${{ secrets.VOLTY_JWT_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           VOLTY_DB_PASSWORD: ${{ secrets.VOLTY_DB_PASSWORD }}
-          CORS_ORIGINS: ${{ vars.CORS_ORIGINS || 'http://localhost:3000' }}
+          CORS_ORIGINS: ${{ vars.CORS_ORIGINS || 'http://localhost:3000,http://127.0.0.1:3000' }}
         run: |
           set -euo pipefail
           ACCOUNT=$(aws sts get-caller-identity --query Account --output text)

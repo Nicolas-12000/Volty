@@ -10,7 +10,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PROFILE="${AWS_PROFILE:-volty-deploy}"
+PROFILE="${AWS_PROFILE:-}"
 REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
 STACK="${VOLTY_FRONT_STACK:-volty-cdn}"
 TEMPLATE="${ROOT}/infra/cloudformation/volty-cdn.yaml"
@@ -19,7 +19,13 @@ API_URL="${VOLTY_API_URL:?Define VOLTY_API_URL con /api al final (Lambda Functio
 export AWS_PAGER=""
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy 2>/dev/null || true
 
-aws_cli() { aws --profile "$PROFILE" --region "$REGION" "$@"; }
+aws_cli() {
+  if [[ -n "$PROFILE" ]]; then
+    aws --profile "$PROFILE" --region "$REGION" "$@"
+  else
+    aws --region "$REGION" "$@"
+  fi
+}
 
 [[ -f "$TEMPLATE" ]] || { echo "Falta $TEMPLATE"; exit 1; }
 

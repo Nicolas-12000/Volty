@@ -6,11 +6,17 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-PROFILE="${AWS_PROFILE:-volty-deploy}"
+PROFILE="${AWS_PROFILE:-}"
 REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
 export AWS_PAGER=""
 
-aws_cli() { aws --profile "$PROFILE" --region "$REGION" "$@"; }
+aws_cli() {
+  if [[ -n "$PROFILE" ]]; then
+    aws --profile "$PROFILE" --region "$REGION" "$@"
+  else
+    aws --region "$REGION" "$@"
+  fi
+}
 
 ACCOUNT="$(aws_cli sts get-caller-identity --query Account --output text)"
 STACKS=(volty volty-student volty-free volty-prod volty-web volty-cdn)

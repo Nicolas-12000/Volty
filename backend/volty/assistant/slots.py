@@ -7,6 +7,7 @@ import re
 from volty.assistant.normalize import merge_user_messages
 from volty.assistant.state import ThreadState
 from volty.core.schemas import NaturalLanguageRequest, ParsedIntent
+from volty.assistant.load_merge import merge_parsed_intents
 from volty.interpreter.service import parse_natural_language
 
 
@@ -32,14 +33,20 @@ def needs_clarification(merged: str) -> str | None:
 
 def extract_intent(state: ThreadState, context_load_name: str | None) -> ParsedIntent:
     merged = merged_context(state)
-    return parse_natural_language(NaturalLanguageRequest(message=merged, context_load_name=context_load_name))
+    fresh = parse_natural_language(NaturalLanguageRequest(message=merged, context_load_name=context_load_name))
+    return merge_parsed_intents(state.draft, fresh)
 
 
 def friendly_summary(intent: ParsedIntent) -> str:
-    load = intent.loads[0]
-    return (
-        f"{intent.explanation}\n\n"
-        f"Borrador: {load.name} · {load.energy_kwh:g} kWh · hasta {load.deadline.strftime('%H:%M')} "
-        f"· {load.max_power_kw:g} kW máx.\n"
-        "Revisa el borrador abajo; puedes editarlo antes de guardar."
-    )
+    lines = [
+        intent.explanation,
+        "",
+        f"Borrador ({len(intent.loads)} carga{'s' if len(intent.loads) != 1 else ''}):",
+    ]
+    for load in intent.loads:
+        lines.append(
+            f"• {load.name} — {load.energy_kwh:g} kWh, máx. {load.max_power_kw:g} kW, "
+            f"antes de {load.deadline.strftime('%H:%M')}"
+        )
+    lines.append("Revisa el borrador abajo; puedes editarlo antes de guardar.")
+    return "\n".join(lines)

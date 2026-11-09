@@ -1,9 +1,0 @@
-aws_region             = "eu-central-1"
-environment            = "prod"
-enable_nat_gateway     = true
-jwt_secret             = "cambiar-por-secreto-largo"
-gemini_api_key         = ""
-frontend_allowed_origins = [
-  "http://localhost:3000",
-  "https://tu-dominio-front.cloudfront.net",
-]

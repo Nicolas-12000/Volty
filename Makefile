@@ -1,4 +1,4 @@
-.PHONY: help setup setup-backend setup-frontend test dev-backend dev-frontend clean-backend-venv db-up db-down db-migrate ingest build-lambdas build-frontend-static deploy-preflight
+.PHONY: help setup setup-backend setup-frontend test dev-backend dev-frontend clean-backend-venv db-up db-down db-migrate ingest build-lambda-api build-frontend-static deploy-preflight
 
 BACKEND := backend
 FRONTEND := frontend
@@ -15,9 +15,9 @@ help:
 	@echo "  make dev-backend      API en :8000"
 	@echo "  make dev-frontend     UI en :3000 (rewrite /api → backend)"
 	@echo "  make ingest           Energy-Charts → PostgreSQL (idempotente)"
-	@echo "  make build-lambdas    zips en infra/build/"
+	@echo "  make build-lambda-api zips en infra/build/"
 	@echo "  make build-frontend-static  out/ para S3/CloudFront"
-	@echo "  make deploy-preflight tests + lambdas + terraform validate"
+	@echo "  make deploy-preflight tests + lambda zip + cfn-lint"
 	@echo "  make clean-backend-venv  borra backend/.venv"
 
 setup: setup-backend setup-frontend
@@ -51,15 +51,16 @@ dev-frontend:
 ingest:
 	cd $(BACKEND) && $(VENV)/python -m volty.ingestion.job
 
-build-lambdas:
-	chmod +x scripts/build-lambdas.sh && ./scripts/build-lambdas.sh
+build-lambda-api:
+	chmod +x scripts/build-lambda-api.sh && ./scripts/build-lambda-api.sh
 
 build-frontend-static:
 	cd $(FRONTEND) && VOLTY_STATIC_EXPORT=1 npm run build
 
-deploy-preflight: test build-lambdas
-	terraform -chdir=infra/terraform init -backend=false
-	terraform -chdir=infra/terraform validate
+deploy-preflight: test build-lambda-api
+	@command -v cfn-lint >/dev/null || { echo "pip install cfn-lint" >&2; exit 1; }
+	cfn-lint -c infra/cloudformation/.cfnlintrc.yaml --non-zero-exit-code error \
+		infra/cloudformation/volty.yaml infra/cloudformation/volty-cdn.yaml
 
 clean-backend-venv:
 	rm -rf $(BACKEND)/.venv

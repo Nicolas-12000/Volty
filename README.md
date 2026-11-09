@@ -17,7 +17,7 @@ volty/
 Compruébalo:
 
 ```bash
-cd ~/proyectos/Mideros\ miderosos/volty   # ajusta la ruta a tu clone
+cd volty   # carpeta donde clonaste el repo
 ls Makefile backend frontend
 ```
 

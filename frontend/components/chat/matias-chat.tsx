@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MatiasAvatar } from "@/components/chat/matias-avatar";
+import { MatiasTypingIndicator } from "@/components/chat/matias-typing";
 import { cn } from "@/lib/cn";
 import {
   matiasChat,
@@ -231,7 +232,7 @@ export function MatiasChat({ className }: { className?: string }) {
           {lines.map((line, i) => (
             <ChatBubble key={`${line.role}-${i}`} line={line} thinking={loading && i === lines.length - 1} />
           ))}
-          {loading ? <p className="text-xs text-ink-dimmed">MATIAS escribe…</p> : null}
+          {loading ? <MatiasTypingIndicator /> : null}
           {error ? <p className="text-sm text-peak">{error}</p> : null}
           <div ref={bottomRef} />
         </div>

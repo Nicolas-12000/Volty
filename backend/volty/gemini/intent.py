@@ -17,6 +17,8 @@ def parse_intent_with_gemini(message: str) -> ParsedIntent | None:
     system = (
         "Convierte peticiones en español sobre cargas eléctricas en un único objeto JSON. "
         f"Zona horaria: {settings.timezone}. deadline en ISO 8601. "
+        "loads[] puede incluir VARIAS cargas distintas (coche, lavadora, ACS, lavavajillas, etc.): "
+        "un elemento por cada aparato mencionado con su kWh, kW máx. y hora límite. "
         "Campos: loads[], preferences{objective, renewable_weight}, explanation. "
         "Responde SOLO JSON válido, sin markdown."
     )

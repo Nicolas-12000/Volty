@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REGION="${AWS_DEFAULT_REGION:-eu-central-1}"
-PROFILE="${AWS_PROFILE:-volty-deploy}"
+PROFILE="${AWS_PROFILE:-}"
 STACK="${VOLTY_STACK_NAME:-volty}"
 PARAMS="${ROOT}/infra/cloudformation/params.json"
 TEMPLATE="${ROOT}/infra/cloudformation/volty.yaml"
@@ -12,7 +12,13 @@ TEMPLATE="${ROOT}/infra/cloudformation/volty.yaml"
 export AWS_PAGER=""
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy 2>/dev/null || true
 
-aws_cli() { aws --profile "$PROFILE" --region "$REGION" "$@"; }
+aws_cli() {
+  if [[ -n "$PROFILE" ]]; then
+    aws --profile "$PROFILE" --region "$REGION" "$@"
+  else
+    aws --region "$REGION" "$@"
+  fi
+}
 
 [[ -f "$TEMPLATE" ]] || { echo "Falta $TEMPLATE"; exit 1; }
 [[ -f "$PARAMS" ]] || { echo "Crea params.json desde params.example.json"; exit 1; }

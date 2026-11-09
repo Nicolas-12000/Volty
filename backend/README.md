@@ -65,10 +65,11 @@ Persistencia: PostgreSQL (`api_cache_entries`, `ingested_snapshots`).
 
 ```text
 volty/core/          config, schemas Pydantic, SQLAlchemy
-volty/optimizer/     LP determinista (futura Lambda optimization)
-volty/interpreter/   NL → JSON (futura Lambda ai-interpreter)
-volty/ingestion/     Energy-Charts, SMARD, caché (futura Lambda data-ingestion)
-volty/api/           rutas FastAPI (futura Lambda api)
+volty/optimizer/     LP determinista
+volty/interpreter/   NL → JSON (reglas + Gemini)
+volty/ingestion/     Energy-Charts, SMARD, caché
+volty/api/           rutas FastAPI (Lambda única vía handlers/api.py)
+handlers/            api.py + migrate.py (empaquetados por build-lambda-api.sh)
 ```
 
 `volty/config.py` reexporta `volty.core.config` por compatibilidad.

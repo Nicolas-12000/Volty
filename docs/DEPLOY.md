@@ -44,7 +44,7 @@ openssl rand -base64 24       # DbPassword
 
 ```bash
 cd volty
-export AWS_PROFILE=volty-deploy
+export AWS_PROFILE=volty-deploy   # o tu perfil / credenciales por defecto
 export AWS_DEFAULT_REGION=eu-central-1
 unset HTTP_PROXY HTTPS_PROXY ALL_PROXY
 

@@ -2,6 +2,8 @@
 
 Plataforma de planificación y recomendación para analizar y optimizar el consumo de energía eléctrica a partir de datos energéticos reales.
 
+> **Repo actual:** monolito FastAPI en **una** Lambda + RDS (`infra/cloudformation/volty.yaml`). Despliegue y CI: [`docs/DEPLOY.md`](docs/DEPLOY.md). Las secciones ~53+ siguen siendo visión histórica (Terraform, varias Lambdas) y no describen el árbol tal como está hoy.
+
 ---
 
 ## 3. Optimización inteligente del consumo energético
