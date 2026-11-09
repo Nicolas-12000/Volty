@@ -4,8 +4,9 @@ Repo: **https://github.com/Nicolas-12000/Volty**
 
 | Evento | Qué hace |
 |--------|-----------|
-| `git push` a `main` | Solo **CI** (pytest, TypeScript, cfn-lint). **No** despliega AWS. |
-| **Actions → Deploy AWS** (manual) | Build Lambda + CloudFormation + migraciones **si marcas desplegar**. |
+| `git push` a `main` (backend/infra/scripts) | **CI** + **Deploy AWS** automático (Lambda + CFN + migraciones). Requiere secrets en GitHub. |
+| `git push` solo `frontend/**` o docs | Solo **CI**; API no se reconstruye (no hubo cambios backend). |
+| **Actions → Deploy AWS** (manual) | Igual que arriba; desmarca *Desplegar* si solo quieres validar sin tocar AWS. |
 | Front CloudFront | Siempre en tu PC: `./scripts/deploy-frontend.sh` (no está en GitHub Actions). |
 
 ---
