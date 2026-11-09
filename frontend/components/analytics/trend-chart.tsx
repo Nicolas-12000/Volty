@@ -13,7 +13,7 @@ export function TrendChart({ points, unit = "", accent = "accent" }: TrendChartP
   const usable = points.filter((point) => Number.isFinite(point.value));
   if (usable.length < 2) {
     return (
-      <p className="type-body-sm text-ink-muted">No hay suficientes puntos para graficar esta serie.</p>
+      <p className="text-sm text-ink-muted">No hay suficientes puntos para graficar esta serie.</p>
     );
   }
 
@@ -24,7 +24,7 @@ export function TrendChart({ points, unit = "", accent = "accent" }: TrendChartP
   const width = 800;
   const height = 180;
   const pad = 12;
-  const stroke = accent === "leaf" ? "var(--v-leaf)" : "var(--v-accent)";
+  const stroke = accent === "leaf" ? "var(--v-leaf)" : "var(--v-accent-bright)";
 
   const coords = values.map((value, i) => {
     const x = pad + (i / (values.length - 1)) * (width - pad * 2);
@@ -49,7 +49,7 @@ export function TrendChart({ points, unit = "", accent = "accent" }: TrendChartP
           strokeLinecap="round"
         />
       </svg>
-      <div className="flex items-center justify-between type-caption tabular-nums text-ink-dimmed">
+      <div className="flex items-center justify-between text-xs tabular-nums text-ink-dimmed">
         <span>
           min {formatNumber(min)} {unit}
         </span>

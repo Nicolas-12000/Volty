@@ -34,12 +34,12 @@ export default function PlanPage() {
         </Button>
       }
     >
-      <div className="mx-auto max-w-6xl space-y-8">
+      <div className="space-y-8">
         {!result ? (
-          <div className="flex flex-col items-center rounded-lg border border-hairline bg-surface-2 p-12 text-center">
-            <h2 className="type-heading text-ink">Todavía no hay un plan</h2>
-            <p className="mt-2 max-w-md type-body text-ink-muted">
-              Define las cargas y pide el horario. MATIAS puede rellenarlas desde el mercado.
+          <div className="flex flex-col items-center rounded-2xl border border-hairline bg-surface-1 p-10 text-center sm:p-12">
+            <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Todavía no hay un plan</h2>
+            <p className="mt-2 max-w-md text-sm text-ink-muted">
+              Define las cargas y pide el horario. MATIAS puede rellenarlas desde el chat.
             </p>
             <Button className="mt-6" onClick={() => router.push("/loads")}>
               Ir a cargas
@@ -53,7 +53,7 @@ export default function PlanPage() {
               savingsVsAsap={result.savings_vs_asap_eur}
             />
             <div className="space-y-3">
-              <h2 className="type-heading text-ink">Comparación</h2>
+              <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Comparación</h2>
               <PlanComparison
                 optimizedCost={result.optimized_total_cost_eur}
                 asapCost={asap?.total_cost_eur ?? 0}
@@ -62,12 +62,12 @@ export default function PlanPage() {
             </div>
             <PlanTimeline plans={result.plans} intervalMinutes={result.interval_minutes} />
             <div className="space-y-4">
-              <h2 className="type-heading text-ink">Detalle por dispositivo</h2>
+              <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Detalle por dispositivo</h2>
               {result.plans.map((plan) => (
                 <PlanDetail key={plan.load_id} plan={plan} intervalMinutes={result.interval_minutes} />
               ))}
             </div>
-            <p className="type-caption text-ink-dimmed">
+            <p className="text-xs text-ink-dimmed">
               Precios mayoristas DE-LU de Energy-Charts. No incluyen impuestos ni peajes.
             </p>
           </>

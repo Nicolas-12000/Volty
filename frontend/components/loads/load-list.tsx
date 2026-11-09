@@ -16,16 +16,9 @@ type LoadListProps = {
   className?: string;
 };
 
-export function LoadList({
-  loads,
-  activeIndex,
-  onSelect,
-  onRemove,
-  onAdd,
-  className,
-}: LoadListProps) {
+export function LoadList({ loads, activeIndex, onSelect, onRemove, onAdd, className }: LoadListProps) {
   return (
-    <div className={cn("grid gap-4 sm:grid-cols-2", className)}>
+    <div className={cn("grid gap-3 sm:grid-cols-2", className)}>
       {loads.map((load, index) => (
         <LoadCard
           key={`${load.name}-${index}`}
@@ -38,14 +31,10 @@ export function LoadList({
       <button
         type="button"
         onClick={onAdd}
-        className={cn(
-          "flex min-h-35 flex-col items-center justify-center gap-3 rounded-lg p-6",
-          "border-2 border-dashed border-hairline-strong bg-surface-2/50 text-ink-muted shadow-lift",
-          "hover:border-accent hover:text-accent",
-        )}
+        className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-hairline-strong bg-canvas p-5 text-ink-muted hover:border-accent hover:text-accent-bright"
       >
-        <span className="type-heading text-ink">Otra carga</span>
-        <span className="type-body-sm">Se abre el mismo formulario, vacío de nombre nuevo.</span>
+        <span className="text-[15px] font-semibold text-ink">Otra carga</span>
+        <span className="text-xs">Añade coche, lavadora o termo.</span>
       </button>
     </div>
   );

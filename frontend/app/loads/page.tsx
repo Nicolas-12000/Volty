@@ -39,20 +39,20 @@ export default function LoadsPage() {
 
   return (
     <AppShell
-      title="Tu carga"
-      subtitle="Paso personal tras el mercado. MATIAS puede rellenar desde /matias o /hogar."
+      title="Tus cargas"
+      subtitle="Energía, potencia y hora límite. El optimizador coloca cada dispositivo en los valles del mercado."
       actions={
-        <Button type="button" onClick={handleOptimize} loading={planning} disabled={planning || loads.length === 0}>
+        <Button type="button" onClick={() => void handleOptimize()} loading={planning} disabled={planning || loads.length === 0}>
           {planning ? "Calculando…" : "Optimizar plan"}
         </Button>
       }
     >
-      <div className="mx-auto flex max-w-3xl flex-col gap-8">
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <Card>
-          <div className="mb-6 flex items-start justify-between gap-4">
+          <div className="mb-5 flex items-start justify-between gap-4">
             <div>
-              <p className="type-label text-accent">Paso 1</p>
-              <h2 className="type-heading mt-2 text-ink">Datos del dispositivo</h2>
+              <p className="text-[13px] text-ink-muted">Dispositivo</p>
+              <h2 className="mt-1 text-[15px] font-semibold tracking-[-0.2px]">Datos de la carga</h2>
             </div>
             {current ? (
               <Button
@@ -69,13 +69,9 @@ export default function LoadsPage() {
             ) : null}
           </div>
           {current ? (
-            <LoadForm
-              load={current}
-              clock={clock}
-              onChange={(data) => updateLoad(index, data)}
-            />
+            <LoadForm load={current} clock={clock} onChange={(data) => updateLoad(index, data)} />
           ) : (
-            <p className="type-body text-ink-muted">Añade un dispositivo para empezar.</p>
+            <p className="text-sm text-ink-muted">Añade un dispositivo para empezar.</p>
           )}
         </Card>
 
@@ -96,9 +92,8 @@ export default function LoadsPage() {
         />
 
         <Card>
-          <p className="type-label text-ink-muted">Paso 2</p>
-          <h2 className="type-heading mt-2 text-ink">Qué debe cuidar el plan</h2>
-          <div className="mt-5 flex flex-wrap gap-3">
+          <p className="text-[13px] text-ink-muted">Qué debe cuidar el plan</p>
+          <div className="mt-4 flex flex-wrap gap-2">
             <Chip active={priority === "cost"} onClick={() => setPriority("cost")}>
               Minimizar coste
             </Chip>
@@ -112,12 +107,19 @@ export default function LoadsPage() {
         </Card>
 
         {error || submitError ? (
-          <div className="rounded-lg border border-peak/30 bg-peak-subtle p-5">
-            <p className="type-body-sm text-peak">{error || submitError}</p>
+          <div className="rounded-lg border border-peak/30 bg-peak-subtle p-4">
+            <p className="text-sm text-peak">{error || submitError}</p>
           </div>
         ) : null}
 
-        <Button type="button" fullWidth onClick={handleOptimize} loading={planning} disabled={planning || loads.length === 0}>
+        <Button
+          type="button"
+          fullWidth
+          size="lg"
+          onClick={() => void handleOptimize()}
+          loading={planning}
+          disabled={planning || loads.length === 0}
+        >
           {planning ? "Calculando…" : "Ver el plan"}
         </Button>
       </div>

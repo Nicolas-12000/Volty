@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TextLink } from "@/components/ui/button-link";
 import { AppShell } from "@/components/layout/app-shell";
 import { Chip } from "@/components/ui/chip";
 import { MetricCard } from "@/components/ui/card";
-import { SkeletonCard } from "@/components/ui/skeleton";
+import { Skeleton, SkeletonCard } from "@/components/ui/skeleton";
+import { loginHref } from "@/lib/access";
 import { TrendChart } from "@/components/analytics/trend-chart";
 import { HistoryTable } from "@/components/analytics/history-table";
 import { fetchSmardFilters, fetchSmardSeries, type SmardSeriesResponse } from "@/lib/api";
@@ -24,7 +26,8 @@ const FILTER_LABELS: Record<string, string> = {
 };
 
 export default function AnalyticsPage() {
-  const { user } = useSession();
+  const { user, status } = useSession();
+  const signedIn = status === "authenticated";
   const { todayPoints, loading: pricesLoading } = usePrices();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [selectedFilter, setSelectedFilter] = useState(410);
@@ -71,20 +74,31 @@ export default function AnalyticsPage() {
 
   return (
     <AppShell
-      title="Analítica"
-      subtitle="Extensión del dashboard de mercado: SMARD y planes guardados en este dispositivo."
+      title="Analítica SMARD"
+      subtitle="Series oficiales de la red alemana y el historial de planes de este dispositivo."
     >
-      <div className="mx-auto max-w-6xl space-y-8">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <MetricCard label="Valle de hoy" value={pricesLoading ? "…" : formatCtKwh(minPrice)} />
-          <MetricCard label="Precio medio" value={pricesLoading ? "…" : formatCtKwh(avgPrice)} />
-          <MetricCard label="Cima de hoy" value={pricesLoading ? "…" : formatCtKwh(maxPrice)} />
+      <div className="space-y-6">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {pricesLoading ? (
+            [0, 1, 2].map((i) => (
+              <div key={i} className="rounded-lg border border-hairline bg-surface-1 p-5">
+                <Skeleton className="h-3.5 w-24" />
+                <Skeleton className="mt-3 h-7 w-28" />
+              </div>
+            ))
+          ) : (
+            <>
+              <MetricCard label="Valle de hoy" value={formatCtKwh(minPrice)} />
+              <MetricCard label="Precio medio" value={formatCtKwh(avgPrice)} />
+              <MetricCard label="Cima de hoy" value={formatCtKwh(maxPrice)} />
+            </>
+          )}
         </div>
 
-        <section className="space-y-4 rounded-lg border border-hairline bg-surface-2 p-5">
+        <section className="space-y-4 rounded-2xl border border-hairline bg-surface-1 p-5">
           <div>
-            <h2 className="type-heading text-ink">Series SMARD</h2>
-            <p className="type-body-sm text-ink-muted">Bundesnetzagentur, zona DE.</p>
+            <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Series SMARD</h2>
+            <p className="text-sm text-ink-muted">Bundesnetzagentur, zona DE.</p>
           </div>
           {Object.keys(filters).length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -98,7 +112,7 @@ export default function AnalyticsPage() {
           {loadingSmard ? (
             <SkeletonCard className="h-48" />
           ) : smardError ? (
-            <p className="type-body-sm text-peak">{smardError}</p>
+            <p className="text-sm text-peak">{smardError}</p>
           ) : points.length ? (
             <TrendChart
               points={points}
@@ -106,14 +120,22 @@ export default function AnalyticsPage() {
               accent={smard?.filter_name?.includes("wind") || smard?.filter_name?.includes("solar") ? "leaf" : "accent"}
             />
           ) : (
-            <p className="type-body-sm text-ink-muted">Elige una serie. Si el API no responde, no hay gráfico.</p>
+            <p className="text-sm text-ink-muted">Elige una serie. Si el API no responde, no hay gráfico.</p>
           )}
         </section>
 
-        <section className="space-y-3">
-          <h2 className="type-heading text-ink">Historial de planes</h2>
-          <HistoryTable entries={history} />
-        </section>
+        {signedIn ? (
+          <section className="space-y-3">
+            <h2 className="text-[15px] font-semibold tracking-[-0.2px]">Historial de planes</h2>
+            <HistoryTable entries={history} />
+          </section>
+        ) : (
+          <p className="text-sm text-ink-muted">
+            El historial de planes es de tu hogar.{" "}
+            <TextLink href={loginHref("/analytics")}>Entra</TextLink>{" "}
+            para verlo.
+          </p>
+        )}
       </div>
     </AppShell>
   );

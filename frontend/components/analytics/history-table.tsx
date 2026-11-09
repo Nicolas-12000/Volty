@@ -8,9 +8,9 @@ type HistoryTableProps = {
 export function HistoryTable({ entries }: HistoryTableProps) {
   if (!entries.length) {
     return (
-      <div className="rounded-lg border border-hairline bg-surface-2 p-8 text-center">
-        <p className="type-heading text-ink">Sin historial todavía</p>
-        <p className="mt-2 type-body-sm text-ink-muted">
+      <div className="rounded-2xl border border-hairline bg-surface-1 p-8 text-center">
+        <p className="text-[15px] font-semibold">Sin historial todavía</p>
+        <p className="mt-2 text-sm text-ink-muted">
           Las optimizaciones que calcules desde Cargas aparecerán aquí en este dispositivo.
         </p>
       </div>
@@ -18,9 +18,9 @@ export function HistoryTable({ entries }: HistoryTableProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-hairline bg-surface-2">
-      <table className="w-full text-left">
-        <thead className="border-b border-hairline bg-surface-1 type-label text-ink-dimmed">
+    <div className="overflow-x-auto rounded-2xl border border-hairline bg-surface-1">
+      <table className="w-full min-w-[36rem] text-left">
+        <thead className="border-b border-hairline bg-canvas text-[11px] font-semibold uppercase tracking-wide text-ink-dimmed">
           <tr>
             <th className="px-5 py-3">Cuándo</th>
             <th className="px-5 py-3">Cargas</th>
@@ -30,17 +30,11 @@ export function HistoryTable({ entries }: HistoryTableProps) {
         </thead>
         <tbody className="divide-y divide-hairline">
           {entries.map((entry) => (
-            <tr key={entry.id} className="hover:bg-surface-hover">
-              <td className="px-5 py-3 type-body-sm tabular-nums text-ink-muted">
-                {formatWhen(entry.createdAt)}
-              </td>
-              <td className="px-5 py-3 type-body-sm text-ink">{entry.loadNames.join(", ")}</td>
-              <td className="px-5 py-3 text-right type-metric-sm text-ink">
-                {money.format(entry.cost)}
-              </td>
-              <td className="px-5 py-3 text-right type-metric-sm text-valley-deep">
-                {money.format(entry.savings)}
-              </td>
+            <tr key={entry.id} className="hover:bg-surface-2">
+              <td className="px-5 py-3 text-sm tabular-nums text-ink-muted">{formatWhen(entry.createdAt)}</td>
+              <td className="px-5 py-3 text-sm text-ink">{entry.loadNames.join(", ")}</td>
+              <td className="px-5 py-3 text-right text-sm text-ink">{money.format(entry.cost)}</td>
+              <td className="px-5 py-3 text-right text-sm text-leaf-bright">{money.format(entry.savings)}</td>
             </tr>
           ))}
         </tbody>

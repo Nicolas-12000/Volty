@@ -13,7 +13,7 @@ export default function DashboardRedirectPage() {
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-canvas">
-      <p className="type-body text-ink-muted">Abriendo inicio…</p>
+      <p className="text-sm text-ink-muted">Abriendo inicio…</p>
     </main>
   );
 }

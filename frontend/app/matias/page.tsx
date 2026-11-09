@@ -7,11 +7,9 @@ export default function MatiasPage() {
   return (
     <AppShell
       title="MATIAS"
-      subtitle="Memoria por hilo en el servidor. El mercado en vivo está en Mercado (/)."
+      subtitle="Háblale como a una persona. El horario lo calcula el optimizador con precios reales."
     >
-      <div className="mx-auto w-full max-w-6xl">
-        <MatiasChat />
-      </div>
+      <MatiasChat />
     </AppShell>
   );
 }

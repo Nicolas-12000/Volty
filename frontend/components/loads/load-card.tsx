@@ -22,23 +22,18 @@ export function LoadCard({ load, selected = false, onSelect, onRemove }: LoadCar
     : "sin hora";
 
   return (
-    <div
-      className={cn(
-        "rounded-lg border bg-surface-2 p-5 shadow-lift",
-        selected ? "border-accent" : "border-hairline",
-      )}
-    >
+    <div className={cn("rounded-lg border bg-surface-1 p-4", selected ? "border-accent" : "border-hairline")}>
       <button type="button" onClick={onSelect} className="w-full text-left">
-        <h3 className="type-heading text-ink">{load.name}</h3>
-        <p className="mt-3 type-body text-ink-muted">
+        <h3 className="text-[15px] font-semibold tracking-[-0.2px] text-ink">{load.name}</h3>
+        <p className="mt-2 text-sm text-ink-muted">
           {load.energy_kwh} kWh · {load.max_power_kw} kW
         </p>
-        <p className="mt-1 type-body-sm text-ink-dimmed">Antes de {deadlineDisplay}</p>
+        <p className="mt-1 text-xs text-ink-dimmed">Antes de {deadlineDisplay}</p>
       </button>
       <button
         type="button"
         onClick={onRemove}
-        className="mt-4 type-caption text-ink-dimmed hover:text-peak"
+        className="mt-3 text-xs text-ink-dimmed hover:text-peak"
         aria-label={`Quitar ${load.name}`}
       >
         Quitar de la lista

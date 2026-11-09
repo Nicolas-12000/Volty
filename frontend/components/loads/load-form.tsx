@@ -65,7 +65,7 @@ export function LoadForm({ load, clock, onChange, className }: LoadFormProps) {
       </div>
       {validationError ? (
         <div className="rounded-md border border-hill/30 bg-hill-subtle p-3">
-          <p className="type-body-sm text-hill">{validationError}</p>
+          <p className="text-sm text-hill">{validationError}</p>
         </div>
       ) : null}
     </div>
