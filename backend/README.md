@@ -4,7 +4,9 @@ API FastAPI para precios (Energy-Charts), interpretación NL y optimización de 
 
 ## Entorno Python (obligatorio: venv local)
 
-No instalar dependencias en el Python del sistema. Usar solo `backend/.venv`:
+No instalar dependencias en el Python del sistema. Usar solo `backend/.venv` para **dev/test** (`requirements-dev.txt`).
+
+**Lambda / deploy:** `./scripts/build-lambda-api.sh` instala con `pip install -t infra/build/api` — paquetes solo ahí y en `api.zip`, **no** en el venv ni en el Python global.
 
 ```bash
 cd backend

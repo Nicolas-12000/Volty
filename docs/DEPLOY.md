@@ -195,6 +195,7 @@ Checklist cuenta AWS:
 | Deploy lento la 1ª vez | RDS + zip grande; normal |
 | Precios vacíos | Revisar salida a `api.energy-charts.info` (Lambda sin VPC en student) |
 | RDS backup / free tier | Plantilla student con `BackupRetentionPeriod=0`; borrar stack en rollback y redeploy |
+| `Unzipped size must be smaller than 262144000` | Rebuild con `./scripts/build-lambda-api.sh` (usa `requirements-lambda.txt`, sin uvicorn, recorta tests scipy/numpy). [Límite Lambda](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html): **250 MB** descomprimido. |
 
 ## 9. Desarrollo local (referencia)
 
