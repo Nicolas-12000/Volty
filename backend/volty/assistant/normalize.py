@@ -26,6 +26,9 @@ def normalize_user_text(text: str) -> str:
     # «1 20» / «1,20» en un mensaje corto ≈ 1,20 kWh (coloquial en chat).
     if re.fullmatch(r"\d+\s+\d{1,2}", out) or re.fullmatch(r"\d+,\d{1,2}", out):
         out = re.sub(r"(\d+)[\s,](\d{1,2})", r"\1.\2 kwh", out)
+    # Solo cifras («59», «70») tras pedir kWh en el hilo.
+    elif re.fullmatch(r"\d+(?:[.,]\d+)?", out):
+        out = f"{out.replace(',', '.')} kwh"
     for pattern, repl in _TYPO_PAIRS:
         out = re.sub(pattern, repl, out, flags=re.I)
     if "kwh" not in out:

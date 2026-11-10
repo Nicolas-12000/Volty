@@ -54,6 +54,21 @@ def test_matias_accumulates_two_loads_in_one_thread() -> None:
     reset_thread(first.thread_id, OWNER)
 
 
+def test_matias_accepts_bare_kwh_number() -> None:
+    first = handle_chat(
+        MatiasChatRequest(
+            message="Necesito cargar el coche antes de las 7 de la mañana y quiero minimizar el coste.",
+        ),
+        owner_email=OWNER,
+    )
+    assert "kWh" in first.reply
+    second = handle_chat(MatiasChatRequest(thread_id=first.thread_id, message="59"), owner_email=OWNER)
+    assert second.draft is not None
+    assert second.draft.loads[0].energy_kwh == 59
+    assert "Para armar la carga necesito la energía" not in second.reply
+    reset_thread(first.thread_id, OWNER)
+
+
 def test_matias_multi_turn_memory() -> None:
     first = handle_chat(
         MatiasChatRequest(message="cargar el cohce antes de las 7 de la mañana"),
