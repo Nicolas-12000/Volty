@@ -121,11 +121,10 @@ jobs:
           cat /tmp/migrate.json
 
   frontend:
-    needs: [changes, api]
+    needs: changes
     if: |
-      (github.event_name == 'push' || (inputs.apply && inputs.deploy_frontend)) &&
-      (needs.changes.outputs.frontend == 'true' || needs.api.result == 'success') &&
-      (needs.api.result == 'success' || needs.api.result == 'skipped')
+      needs.changes.outputs.frontend == 'true' &&
+      (github.event_name == 'push' || inputs.deploy_frontend)
     runs-on: ubuntu-latest
     env:
       AWS_REGION: ${{ vars.AWS_REGION || 'eu-central-1' }}

@@ -5,9 +5,9 @@ Repo: **https://github.com/Nicolas-12000/Volty**
 | Evento | Qué hace |
 |--------|-----------|
 | `git push` a `main` (backend/infra/scripts) | **CI** + **Deploy AWS**: Lambda + migraciones; si además cambió el front o la API se desplegó, también **S3 + CloudFront**. |
-| `git push` solo `frontend/**` | **CI** + job **frontend** del workflow (API sin rebuild, bundle nuevo en CloudFront). |
-| **Actions → Deploy AWS** (manual) | API y/o front según checks; desmarca *Desplegar* para solo validar builds. |
-| Front local de urgencia | `./scripts/deploy-frontend.sh` (mismo script que usa GitHub). |
+| `git push` solo `frontend/**` | **CI** + job **frontend** (S3 + CloudFront; API no se reconstruye). |
+| **Actions → Deploy AWS** (manual) | Marca solo **Publicar front** si quieres UI sin tocar Lambda. |
+| CloudFront ya (sin Actions) | `./scripts/deploy-frontend.sh` con `VOLTY_API_URL` + perfil AWS. |
 
 ---
 
