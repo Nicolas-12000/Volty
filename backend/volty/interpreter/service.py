@@ -90,15 +90,21 @@ _APPLIANCE_RE = re.compile("|".join(f"(?:{item.pattern})" for item in _APPLIANCE
 
 
 def parse_rules_intent(request: NaturalLanguageRequest) -> ParsedIntent:
+    from volty.assistant.normalize import normalize_user_text
+
     raw = request.message.strip()
     if not raw:
         raise ValueError("Mensaje vacío.")
-    return _rule_based_parse(_fold(raw), request.context_load_name)
+    return _rule_based_parse(_fold(normalize_user_text(raw)), request.context_load_name)
 
 
 def parse_natural_language(request: NaturalLanguageRequest) -> ParsedIntent:
     rules = parse_rules_intent(request)
-    gemini = parse_intent_with_gemini(request.message.strip())
+    raw = request.message.strip()
+    explicit = bool(_ENERGY_RE.search(raw)) and bool(_POWER_RE.search(raw))
+    if explicit and rules.loads:
+        return rules
+    gemini = parse_intent_with_gemini(raw)
     if gemini and gemini.loads:
         return _merge_intents(rules, gemini)
     return rules

@@ -87,7 +87,10 @@ def extract_intent(state: ThreadState, context_load_name: str | None) -> ParsedI
         if not text:
             continue
         try:
-            piece = parse_line_intent(text, _context_from_line(text))
+            ctx = _context_from_line(text)
+            if ctx is None and intent is not None and intent.loads:
+                ctx = intent.loads[-1].name
+            piece = parse_line_intent(text, ctx)
         except ValueError:
             continue
         intent = merge_parsed_intents(intent, piece)

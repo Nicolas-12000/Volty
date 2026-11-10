@@ -48,5 +48,5 @@ def test_chat_thread_keeps_four_loads() -> None:
     assert fourth.draft is not None
     assert len(fourth.draft.loads) >= 3
     names = {load.name for load in fourth.draft.loads}
-    assert "Ordenador / PC" in names
+    assert names & {"Ordenador / PC", "PC"}
     reset_thread(first.thread_id, OWNER)

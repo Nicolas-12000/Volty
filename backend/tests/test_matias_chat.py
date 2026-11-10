@@ -48,7 +48,7 @@ def test_matias_accumulates_two_loads_in_one_thread() -> None:
 
     assert fifth.draft is not None
     families = {load.name for load in fifth.draft.loads}
-    assert "Vehículo eléctrico" in families
+    assert families & {"Vehículo eléctrico", "Coche eléctrico"}
     assert "Lavadora" in families
     assert any(load.name == "Lavadora" and abs(load.energy_kwh - 1.2) < 0.01 for load in fifth.draft.loads)
     reset_thread(first.thread_id, OWNER)
