@@ -35,7 +35,10 @@ jobs:
       - name: Pytest
         env:
           DATABASE_URL: postgresql+psycopg://volty:volty@127.0.0.1:5432/volty
-        run: cd backend && .venv/bin/pytest -q
+        run: |
+          cd backend
+          .venv/bin/alembic upgrade head
+          .venv/bin/pytest -q
 
   frontend:
     runs-on: ubuntu-latest
