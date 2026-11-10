@@ -37,6 +37,22 @@ def test_pitch_message_keeps_every_appliance():
     assert parsed.preferences.renewable_weight == 0.4
 
 
+def test_second_appliance_does_not_inherit_ev_kwh():
+    parsed = parse_natural_language(
+        NaturalLanguageRequest(
+            message=(
+                "necesito cargar el coche 59 kwh antes de las 7 de la manana "
+                "lavadora esta noche lo mas barato posible"
+            )
+        )
+    )
+    assert len(parsed.loads) == 2
+    by_name = {load.name: load for load in parsed.loads}
+    assert by_name["Vehículo eléctrico"].energy_kwh == 59
+    assert by_name["Lavadora"].energy_kwh == 1.2
+    assert by_name["Lavadora"].deadline.hour == 23 or by_name["Lavadora"].deadline.hour == 22
+
+
 def test_power_is_not_read_from_kwh():
     parsed = parse_natural_language(
         NaturalLanguageRequest(message="Coche 12 kWh antes de las 7, máximo 3,6 kW")

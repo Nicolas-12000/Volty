@@ -29,6 +29,8 @@ export type ChatLine = ChatMessageDto & {
   actions?: MatiasChatResponse["actions"];
 };
 
+const CHAT_HINTS = ["45 kWh", "Antes de las 7", "Lo más barato", "Lavadora esta noche"] as const;
+
 const STARTER: ChatLine = {
   role: "assistant",
   content:
@@ -243,6 +245,19 @@ export function MatiasChat({ className }: { className?: string }) {
         </div>
 
         <div className="shrink-0 border-t border-hairline p-4">
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {CHAT_HINTS.map((hint) => (
+              <button
+                key={hint}
+                type="button"
+                disabled={loading}
+                onClick={() => setDraftInput(hint)}
+                className="rounded-full border border-hairline bg-surface-2 px-2.5 py-1 text-xs text-ink-muted transition-colors hover:border-hairline-strong hover:text-ink disabled:opacity-50"
+              >
+                {hint}
+              </button>
+            ))}
+          </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <textarea
               rows={2}

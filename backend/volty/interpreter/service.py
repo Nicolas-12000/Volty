@@ -35,19 +35,21 @@ class _Appliance:
     name: str
     slug: str
     default_kw: float
+    default_kwh: float
 
 
 # Orden: el más específico gana en la misma posición (lavavajillas antes que nada, coche eléctrico antes que coche).
 _APPLIANCES: tuple[_Appliance, ...] = (
-    _Appliance(r"lavavajillas", "Lavavajillas", "lavavajillas", 1.8),
-    _Appliance(r"lavadora", "Lavadora", "lavadora", 2.2),
-    _Appliance(r"secadora", "Secadora", "secadora", 2.0),
-    _Appliance(r"bomba de calor|\bacs\b", "Bomba de calor / ACS", "acs", 3.0),
+    _Appliance(r"lavavajillas", "Lavavajillas", "lavavajillas", 1.8, 1.0),
+    _Appliance(r"lavadora", "Lavadora", "lavadora", 2.2, 1.2),
+    _Appliance(r"secadora", "Secadora", "secadora", 2.0, 2.5),
+    _Appliance(r"bomba de calor|\bacs\b", "Bomba de calor / ACS", "acs", 3.0, 4.5),
     _Appliance(
         r"coche electrico|vehiculo electrico|\bcoche\b|\bvehiculo\b|\bwallbox\b",
         "Vehículo eléctrico",
         "coche",
         11.0,
+        30.0,
     ),
 )
 _APPLIANCE_RE = re.compile("|".join(f"(?:{item.pattern})" for item in _APPLIANCES), re.I)
@@ -97,9 +99,9 @@ def _rule_based_parse(text: str, default_name: str | None) -> ParsedIntent:
             found = _floats(_ENERGY_RE, window)
             if not found:
                 if len(matches) == 1:
-                    energy = energies[0] if energies else 30.0
+                    energy = energies[0] if energies else appliance.default_kwh
                 else:
-                    continue
+                    energy = appliance.default_kwh
             else:
                 energy = found[0]
         if len(powers) == len(matches):
@@ -111,9 +113,19 @@ def _rule_based_parse(text: str, default_name: str | None) -> ParsedIntent:
             deadline = deadlines[index]
         else:
             local = _deadlines(window, now)
-            deadline = local[0] if _DEADLINE_RE.search(_scrub(window)) or _CLOCK_RE.search(_scrub(window)) else (
-                deadlines[0] if deadlines else _default_deadline(now)
+            window_has_time = bool(
+                _DEADLINE_RE.search(_scrub(window)) or _CLOCK_RE.search(_scrub(window))
             )
+            if "esta noche" in window or "hoy por la noche" in window:
+                deadline = now.replace(hour=23, minute=0, second=0, microsecond=0)
+                if deadline <= now:
+                    deadline = deadline.replace(hour=22, minute=0)
+            elif window_has_time and local:
+                deadline = local[0]
+            elif len(matches) == 1 and deadlines:
+                deadline = deadlines[0]
+            else:
+                deadline = _default_deadline(now)
         seen[appliance.slug] = seen.get(appliance.slug, 0) + 1
         suffix = "" if seen[appliance.slug] == 1 else f"-{seen[appliance.slug]}"
         loads.append(

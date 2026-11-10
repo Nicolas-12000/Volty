@@ -16,19 +16,10 @@ def merged_context(state: ThreadState) -> str:
     return merge_user_messages(user_lines)
 
 
-def needs_clarification(merged: str) -> str | None:
-    has_energy = bool(re.search(r"\d+(?:[.,]\d+)?\s*kwh", merged))
-    has_time = bool(
-        re.search(r"(antes de|para las|a las|\d{1,2}:\d{2}|mañana|tarde|de la mañana)", merged)
-    )
-    if not has_energy and any(w in merged for w in ("carga", "cargar", "veh", "coche", "lavadora")):
-        return (
-            "Para armar la carga necesito la energía en kWh (ej. «45 kWh»). "
-            "Puedes enviarlo en otro mensaje."
-        )
-    if has_energy and not has_time:
-        return "¿Antes de qué hora debe estar lista? Ej.: «antes de las 7»."
-    return None
+def needs_clarification(merged: str, state: ThreadState | None = None) -> str | None:
+    from volty.assistant.conversational import clarification_message
+
+    return clarification_message(merged, state)
 
 
 def _context_load_name_for_tail(state: ThreadState) -> str | None:

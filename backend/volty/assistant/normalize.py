@@ -29,6 +29,10 @@ def normalize_user_text(text: str) -> str:
     # Solo cifras («59», «70») tras pedir kWh en el hilo.
     elif re.fullmatch(r"\d+(?:[.,]\d+)?", out):
         out = f"{out.replace(',', '.')} kwh"
+    else:
+        power_hint = re.fullmatch(r"(?:como|unos|pon(?:er)?|max(?:imo)?|~|a)?\s*(\d+(?:[.,]\d+)?)", out)
+        if power_hint and "kwh" not in out and "kw" not in out:
+            out = f"{power_hint.group(1).replace(',', '.')} kw"
     for pattern, repl in _TYPO_PAIRS:
         out = re.sub(pattern, repl, out, flags=re.I)
     if "kwh" not in out:

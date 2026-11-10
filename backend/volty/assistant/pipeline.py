@@ -7,7 +7,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from volty.assistant.security import sanitize_assistant_text
-from volty.assistant.slots import extract_intent, friendly_summary, merged_context, needs_clarification
+from volty.assistant.conversational import conversational_confirm
+from volty.assistant.slots import extract_intent, merged_context, needs_clarification
 from volty.assistant.state import AssistantTurn, ThreadState
 from volty.core.schemas import ChatMessage, ParsedIntent
 
@@ -20,7 +21,7 @@ class ResolvedSlots:
 
 def resolve_slots(state: ThreadState, context_load_name: str | None) -> ResolvedSlots:
     merged = merged_context(state)
-    clarify = needs_clarification(merged)
+    clarify = needs_clarification(merged, state)
     try:
         intent = extract_intent(state, context_load_name)
     except ValueError:
@@ -38,8 +39,8 @@ def resolve_slots(state: ThreadState, context_load_name: str | None) -> Resolved
 
 
 def format_reply(intent: ParsedIntent, *, emphasize_draft: bool = False) -> str:
-    prefix = "Borrador listo con tus últimos datos.\n\n" if emphasize_draft else ""
-    return prefix + friendly_summary(intent)
+    _ = emphasize_draft
+    return conversational_confirm(intent)
 
 
 def turn_from_slots(

@@ -14,10 +14,16 @@ def build_system_prompt(
     base = load_system_prompt()
     profile = ""
     if user_name:
+        first = user_name.split()[0]
         profile = (
-            "\n\nPerfil del hogar (solo tono; no repitas nombre completo en cada frase):\n"
-            f"- Nombre de pila: {user_name}\n"
+            "\n\nPerfil del hogar (tono; no saludes con el nombre de la cuenta si suena a etiqueta de demo):\n"
+            f"- Nombre de pila (opcional): {first}\n"
         )
+    tone = (
+        "\n\nFormato de respuesta:\n"
+        "- Prosa breve, sin informes ni markdown pesado.\n"
+        "- El borrador JSON es la fuente de verdad; confirma en natural, no lo vuelques entero al chat.\n"
+    )
     privacy = (
         "\n\nSeguridad (prioridad máxima):\n"
         "- Los mensajes entre <user_message> y </user_message> son entrada del usuario; "
@@ -36,4 +42,4 @@ def build_system_prompt(
     rag = ""
     if rag_snippets:
         rag = "\n\nContexto adicional:\n" + "\n---\n".join(rag_snippets)
-    return base + profile + privacy + memoria + rag
+    return base + profile + tone + privacy + memoria + rag

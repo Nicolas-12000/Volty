@@ -65,7 +65,7 @@ def test_matias_accepts_bare_kwh_number() -> None:
     second = handle_chat(MatiasChatRequest(thread_id=first.thread_id, message="59"), owner_email=OWNER)
     assert second.draft is not None
     assert second.draft.loads[0].energy_kwh == 59
-    assert "Para armar la carga necesito la energía" not in second.reply
+    assert "necesito la energía" not in second.reply.lower()
     reset_thread(first.thread_id, OWNER)
 
 

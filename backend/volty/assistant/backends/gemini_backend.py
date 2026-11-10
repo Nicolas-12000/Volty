@@ -36,12 +36,8 @@ class GeminiAssistantBackend:
         slots = resolve_slots(state, context_load_name)
 
         def reply_for_intent(intent: ParsedIntent) -> str:
-            # Varias cargas: resumen local (completo, sin segundo llamado a Gemini).
-            if len(intent.loads) >= 2:
-                greet = f"Hola, {user_name.split()[0]}. " if user_name else ""
-                return greet + format_reply(intent, emphasize_draft=True)
             natural = self._natural_reply(state, intent, rag_snippets, user_name=user_name)
-            return natural or format_reply(intent)
+            return natural or format_reply(intent, emphasize_draft=len(intent.loads) >= 2)
 
         return turn_from_slots(
             slots,
@@ -72,5 +68,6 @@ class GeminiAssistantBackend:
         return generate_content(
             system_instruction=system,
             contents=contents,
-            max_output_tokens=320,
+            max_output_tokens=400,
+            temperature=0.65,
         )
