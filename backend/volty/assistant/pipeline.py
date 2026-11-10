@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -20,15 +21,20 @@ class ResolvedSlots:
 def resolve_slots(state: ThreadState, context_load_name: str | None) -> ResolvedSlots:
     merged = merged_context(state)
     clarify = needs_clarification(merged)
-    if clarify:
-        return ResolvedSlots(clarify=clarify, intent=None)
-
     try:
-        return ResolvedSlots(clarify=None, intent=extract_intent(state, context_load_name))
+        intent = extract_intent(state, context_load_name)
     except ValueError:
         if state.draft is not None:
-            return ResolvedSlots(clarify=None, intent=state.draft)
-        raise
+            intent = state.draft
+        elif clarify:
+            return ResolvedSlots(clarify=clarify, intent=None)
+        else:
+            raise
+    if clarify:
+        if intent is not None and not re.search(r"\d+(?:[.,]\d+)?\s*kwh", merged, re.I):
+            intent = None
+        return ResolvedSlots(clarify=clarify, intent=intent)
+    return ResolvedSlots(clarify=None, intent=intent)
 
 
 def format_reply(intent: ParsedIntent, *, emphasize_draft: bool = False) -> str:
@@ -44,7 +50,11 @@ def turn_from_slots(
 ) -> AssistantTurn:
     if slots.clarify:
         msg = sanitize_assistant_text(slots.clarify)
-        return AssistantTurn(reply=msg, intent=None, assistant_message=ChatMessage(role="assistant", content=msg))
+        return AssistantTurn(
+            reply=msg,
+            intent=slots.intent,
+            assistant_message=ChatMessage(role="assistant", content=msg),
+        )
     if slots.intent is None:
         msg = sanitize_assistant_text(no_intent_message)
         return AssistantTurn(reply=msg, intent=None, assistant_message=ChatMessage(role="assistant", content=msg))

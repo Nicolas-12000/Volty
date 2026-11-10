@@ -22,6 +22,25 @@ def test_merge_load_specs_keeps_distinct_appliances() -> None:
     assert names == {"ACS", "Coche eléctrico", "Lavadora"}
 
 
+def test_merge_parsed_intents_llm_single_load_does_not_replace_hogar() -> None:
+    old = ParsedIntent(
+        loads=[_load("Coche eléctrico", 70.0)],
+        preferences=OptimizationPreferences(),
+        explanation="coche",
+        confidence="rule_based",
+    )
+    new = ParsedIntent(
+        loads=[_load("Lavadora", 1.2)],
+        preferences=OptimizationPreferences(),
+        explanation="lavadora",
+        confidence="llm",
+    )
+    out = merge_parsed_intents(old, new)
+    assert len(out.loads) == 2
+    names = {item.name for item in out.loads}
+    assert names == {"Coche eléctrico", "Lavadora"}
+
+
 def test_merge_parsed_intents_accumulates_turns() -> None:
     old = ParsedIntent(
         loads=[_load("ACS", 4.5)],
