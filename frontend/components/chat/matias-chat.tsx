@@ -82,7 +82,7 @@ export function MatiasChat({ className }: { className?: string }) {
   const [threadsLoading, setThreadsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState<{ backend?: string; rag?: boolean }>({});
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
 
   const email = user?.email?.toLowerCase();
 
@@ -138,8 +138,10 @@ export function MatiasChat({ className }: { className?: string }) {
   }, [status, email, openThread, refreshThreads]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [lines, loading, draft]);
+    const panel = messagesScrollRef.current;
+    if (!panel) return;
+    panel.scrollTo({ top: panel.scrollHeight, behavior: "smooth" });
+  }, [lines, loading]);
 
   async function send() {
     const text = draftInput.trim();
@@ -235,13 +237,15 @@ export function MatiasChat({ className }: { className?: string }) {
           <MetaCaption backend={meta.backend} rag={meta.rag} />
         </div>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 sm:p-5">
+        <div
+          ref={messagesScrollRef}
+          className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 sm:p-5"
+        >
           {lines.map((line, i) => (
             <ChatBubble key={`${line.role}-${i}`} line={line} thinking={loading && i === lines.length - 1} />
           ))}
           {loading ? <MatiasTypingIndicator /> : null}
           {error ? <p className="text-sm text-peak">{error}</p> : null}
-          <div ref={bottomRef} />
         </div>
 
         <div className="shrink-0 border-t border-hairline p-4">

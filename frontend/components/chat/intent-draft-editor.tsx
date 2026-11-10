@@ -14,8 +14,9 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
   const loads = draft.loads ?? [];
   if (!loads.length) return null;
 
+  const label = "text-xs leading-snug text-ink-muted";
   const field =
-    "mt-1 w-full rounded-md border border-hairline bg-canvas px-3 py-2 text-sm text-ink focus:border-hairline-strong focus:outline-none";
+    "h-10 w-full rounded-md border border-hairline bg-canvas px-3 text-sm text-ink tabular-nums focus:border-hairline-strong focus:outline-none";
 
   const patchLoads = (nextLoads: LoadSpec[]) => {
     onChange({ ...draft, loads: nextLoads });
@@ -53,17 +54,17 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
   };
 
   return (
-    <div className="rounded-2xl border border-hairline bg-surface-1 p-4">
+    <div className="space-y-3">
       <p className="text-[13px] text-ink-muted">
         Borrador editable · {loads.length} {loads.length === 1 ? "carga" : "cargas"}
       </p>
-      <ul className="mt-3 space-y-4">
+      <ul className="space-y-3">
         {loads.map((load, index) => (
           <li
             key={`${load.id ?? load.name}-${index}`}
             className="rounded-xl border border-hairline bg-canvas/40 p-3"
           >
-            <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="mb-3 flex items-center justify-between gap-2">
               <span className="text-xs font-medium text-ink-muted">Carga {index + 1}</span>
               {loads.length > 1 ? (
                 <button
@@ -75,39 +76,45 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
                 </button>
               ) : null}
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="block sm:col-span-2">
-                <span className="text-xs text-ink-muted">Nombre</span>
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1">
+                <span className={label}>Nombre</span>
                 <input
                   value={load.name}
                   onChange={(e) => patchLoadAt(index, { name: e.target.value })}
                   className={field}
                 />
               </label>
-              <label>
-                <span className="text-xs text-ink-muted">Energía (kWh)</span>
-                <input
-                  type="number"
-                  min={0.01}
-                  step={0.01}
-                  value={load.energy_kwh}
-                  onChange={(e) => patchLoadAt(index, { energy_kwh: Number(e.target.value) })}
-                  className={field}
-                />
-              </label>
-              <label>
-                <span className="text-xs text-ink-muted">Potencia máx. (kW)</span>
-                <input
-                  type="number"
-                  min={0.01}
-                  step={0.01}
-                  value={load.max_power_kw}
-                  onChange={(e) => patchLoadAt(index, { max_power_kw: Number(e.target.value) })}
-                  className={field}
-                />
-              </label>
-              <label className="sm:col-span-2">
-                <span className="text-xs text-ink-muted">Listo antes de</span>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex min-w-0 flex-col gap-1">
+                  <span className={`${label} flex min-h-8 items-end`}>kWh</span>
+                  <input
+                    type="number"
+                    min={0.01}
+                    step={0.01}
+                    title="Energía en kWh"
+                    aria-label="Energía en kWh"
+                    value={load.energy_kwh}
+                    onChange={(e) => patchLoadAt(index, { energy_kwh: Number(e.target.value) })}
+                    className={field}
+                  />
+                </label>
+                <label className="flex min-w-0 flex-col gap-1">
+                  <span className={`${label} flex min-h-8 items-end`}>kW máx.</span>
+                  <input
+                    type="number"
+                    min={0.01}
+                    step={0.01}
+                    title="Potencia máxima en kW"
+                    aria-label="Potencia máxima en kW"
+                    value={load.max_power_kw}
+                    onChange={(e) => patchLoadAt(index, { max_power_kw: Number(e.target.value) })}
+                    className={field}
+                  />
+                </label>
+              </div>
+              <label className="flex flex-col gap-1">
+                <span className={label}>Listo antes de</span>
                 <input
                   type="datetime-local"
                   value={formatBerlinDateTimeLocal(new Date(load.deadline))}
@@ -115,13 +122,14 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
                   className={field}
                 />
               </label>
-              <label className="flex items-center gap-2 sm:col-span-2">
+              <label className="flex cursor-pointer items-start gap-2.5 rounded-md border border-transparent py-0.5">
                 <input
                   type="checkbox"
+                  className="mt-0.5 size-4 shrink-0 accent-accent"
                   checked={!!load.must_run}
                   onChange={(e) => patchLoadAt(index, { must_run: e.target.checked })}
                 />
-                <span className="text-xs text-ink-muted">No se puede pausar una vez arranca</span>
+                <span className={`${label} leading-snug`}>Sin pausar cuando arranca</span>
               </label>
             </div>
           </li>
@@ -134,8 +142,8 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
       >
         + Añadir otra carga
       </button>
-      <label className="mt-4 block">
-        <span className="text-xs text-ink-muted">Objetivo global del plan</span>
+      <label className="mt-1 flex flex-col gap-1 border-t border-hairline pt-3">
+        <span className={label}>Objetivo global del plan</span>
         <select
           value={draft.preferences.objective}
           onChange={(e) =>
