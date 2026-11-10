@@ -36,8 +36,8 @@ export function MatiasThreadList({
   const empty = sorted.filter((t) => t.message_count === 0);
 
   return (
-    <aside className="flex max-h-80 flex-col rounded-2xl border border-hairline bg-surface-1 lg:max-h-[calc(100dvh-8rem)]">
-      <div className="flex items-center justify-between gap-2 border-b border-hairline px-3 py-3">
+    <aside className="flex max-h-80 min-h-0 flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-1 lg:h-full lg:max-h-none">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-hairline px-3 py-3">
         <p className="text-[13px] font-medium text-ink">Chats</p>
         <button
           type="button"
@@ -53,7 +53,7 @@ export function MatiasThreadList({
           {creating ? "Creando…" : "Nuevo"}
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-2">
         {loading ? <p className="px-2 py-3 text-xs text-ink-dimmed">Cargando…</p> : null}
         {!loading && threads.length === 0 ? (
           <p className="px-2 py-3 text-sm text-ink-muted">Sin chats. Pulsa Nuevo para empezar.</p>

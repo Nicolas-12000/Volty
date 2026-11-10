@@ -213,7 +213,7 @@ export function MatiasChat({ className }: { className?: string }) {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[220px_1fr_320px] lg:gap-6">
+    <div className="grid gap-4 lg:h-[calc(100dvh-13.5rem)] lg:min-h-128 lg:grid-cols-[220px_1fr_320px] lg:items-stretch lg:gap-6">
       <MatiasThreadList
         threads={threads}
         activeId={threadId}
@@ -223,12 +223,17 @@ export function MatiasChat({ className }: { className?: string }) {
         loading={threadsLoading}
       />
 
-      <div className={cn("flex min-h-128 flex-col rounded-2xl border border-hairline bg-surface-1", className)}>
-        <div className="flex items-center justify-between gap-3 border-b border-hairline px-4 py-3">
+      <div
+        className={cn(
+          "flex h-[min(72dvh,40rem)] min-h-128 min-w-0 flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-1 lg:h-full lg:max-h-none",
+          className,
+        )}
+      >
+        <div className="shrink-0 border-b border-hairline px-4 py-3">
           <MetaCaption backend={meta.backend} rag={meta.rag} />
         </div>
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-4 sm:p-5">
           {lines.map((line, i) => (
             <ChatBubble key={`${line.role}-${i}`} line={line} thinking={loading && i === lines.length - 1} />
           ))}
@@ -237,7 +242,7 @@ export function MatiasChat({ className }: { className?: string }) {
           <div ref={bottomRef} />
         </div>
 
-        <div className="border-t border-hairline p-4">
+        <div className="shrink-0 border-t border-hairline p-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <textarea
               rows={2}
@@ -266,7 +271,7 @@ export function MatiasChat({ className }: { className?: string }) {
         </div>
       </div>
 
-      <aside className="space-y-4 lg:max-h-[calc(100dvh-8rem)] lg:overflow-y-auto lg:pr-1">
+      <aside className="flex max-h-96 min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain lg:h-full lg:max-h-none lg:pr-1">
         {draft ? (
           <>
             <IntentDraftEditor
