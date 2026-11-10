@@ -29,9 +29,15 @@ def _variant(pool: tuple[str, ...], state: ThreadState | None) -> str:
 def clarification_message(merged: str, state: ThreadState | None = None) -> str | None:
     has_energy = bool(re.search(r"\d+(?:[.,]\d+)?\s*kwh", merged))
     has_time = bool(
-        re.search(r"(antes de|para las|a las|\d{1,2}:\d{2}|mañana|tarde|de la manana|esta noche)", merged)
+        re.search(
+            r"(antes de|para las|a las|\d{1,2}:\d{2}|mañana|tarde|de la manana|esta noche|de noche|antes de dormir)",
+            merged,
+        )
     )
-    charging = any(w in merged for w in ("carga", "cargar", "veh", "coche", "lavadora", "secadora", "lavavajillas"))
+    charging = any(
+        w in merged
+        for w in ("carga", "cargar", "veh", "coche", "lavadora", "secadora", "lavavajillas", "movil", "celular")
+    )
     if not has_energy and charging:
         return _variant(_ENERGY_HINTS, state)
     if has_energy and not has_time:

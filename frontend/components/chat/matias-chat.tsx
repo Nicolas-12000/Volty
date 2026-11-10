@@ -149,7 +149,7 @@ export function MatiasChat({ className }: { className?: string }) {
     setDraftInput("");
     setLoading(true);
     try {
-      const res = await matiasChat({ thread_id: threadId, message: text });
+      const res = await matiasChat({ thread_id: threadId, message: text, draft: draft ?? undefined });
       if (email) writeActiveThreadId(email, res.thread_id);
       setThreadId(res.thread_id);
       setLines(toLines(res.messages));
@@ -286,27 +286,41 @@ export function MatiasChat({ className }: { className?: string }) {
         </div>
       </div>
 
-      <aside className="flex max-h-96 min-h-0 flex-col gap-4 overflow-y-auto overscroll-contain lg:h-full lg:max-h-none lg:pr-1">
-        {draft ? (
-          <>
+      <aside className="flex max-h-96 min-h-0 flex-col overflow-hidden rounded-2xl border border-hairline bg-surface-1 lg:h-full lg:max-h-none">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 pb-2">
+          {draft ? (
             <IntentDraftEditor
               draft={draft}
-              onChange={setDraft}
+              onChange={(next) => {
+                setDraft(next);
+                if (threadId) {
+                  void patchMatiasDraft(threadId, next).catch(() => undefined);
+                }
+              }}
               onSaveRemote={() => void syncDraft()}
               saving={draftSaving}
             />
-            <p className="text-xs text-ink-dimmed">
-              El borrador se guarda en este hilo hasta que lo apliques o borres el chat.
+          ) : (
+            <p className="text-sm text-ink-muted">
+              MATIAS irá completando el borrador con todo lo que digas en esta conversación.
             </p>
-            <Button type="button" className="w-full" onClick={applyDraft}>
+          )}
+        </div>
+        {draft ? (
+          <div className="shrink-0 space-y-2 border-t border-hairline bg-surface-1 p-4">
+            <p className="text-center text-[11px] text-ink-dimmed">
+              El borrador vive en este chat hasta que lo apliques.
+            </p>
+            <Button
+              type="button"
+              size="lg"
+              className="h-12 w-full text-[15px] font-semibold shadow-sm"
+              onClick={applyDraft}
+            >
               Guardar en cargas
             </Button>
-          </>
-        ) : (
-          <p className="rounded-lg border border-dashed border-hairline p-4 text-sm text-ink-muted">
-            MATIAS irá completando el borrador con todo lo que digas en esta conversación.
-          </p>
-        )}
+          </div>
+        ) : null}
       </aside>
     </div>
   );

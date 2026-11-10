@@ -88,8 +88,8 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
                 <span className="text-xs text-ink-muted">Energía (kWh)</span>
                 <input
                   type="number"
-                  min={0.1}
-                  step={0.1}
+                  min={0.01}
+                  step={0.01}
                   value={load.energy_kwh}
                   onChange={(e) => patchLoadAt(index, { energy_kwh: Number(e.target.value) })}
                   className={field}
@@ -99,8 +99,8 @@ export function IntentDraftEditor({ draft, onChange, onSaveRemote, saving }: Int
                 <span className="text-xs text-ink-muted">Potencia máx. (kW)</span>
                 <input
                   type="number"
-                  min={0.1}
-                  step={0.1}
+                  min={0.01}
+                  step={0.01}
                   value={load.max_power_kw}
                   onChange={(e) => patchLoadAt(index, { max_power_kw: Number(e.target.value) })}
                   className={field}

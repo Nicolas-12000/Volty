@@ -17,8 +17,12 @@ def parse_intent_with_gemini(message: str) -> ParsedIntent | None:
     system = (
         "Convierte peticiones en español sobre cargas eléctricas en un único objeto JSON. "
         f"Zona horaria: {settings.timezone}. deadline en ISO 8601. "
-        "loads[] puede incluir VARIAS cargas distintas (coche, lavadora, ACS, lavavajillas, etc.): "
-        "un elemento por cada aparato mencionado con su kWh, kW máx. y hora límite. "
+        "loads[] debe incluir TODAS las cargas mencionadas (10+ en un hogar es normal). "
+        "Incluye aparatos del catálogo mental (coche, lavadora, móvil, PC…) y también "
+        "cualquier electrodoméstico raro que nombre el usuario (pelapapas eléctrico, "
+        "freidora, plancha, etc.) con name descriptivo en español. "
+        "Si faltan kWh o kW, usa defaults conservadores (pequeños aparatos ~0,1–0,5 kWh y ≤1 kW; "
+        "grandes según contexto). No omitas aparatos. "
         "Campos: loads[], preferences{objective, renewable_weight}, explanation. "
         "Responde SOLO JSON válido, sin markdown."
     )
@@ -26,7 +30,7 @@ def parse_intent_with_gemini(message: str) -> ParsedIntent | None:
         system_instruction=system,
         contents=[{"role": "user", "parts": [{"text": message}]}],
         temperature=0.1,
-        max_output_tokens=1200,
+        max_output_tokens=2400,
     )
     if not text:
         return None

@@ -37,6 +37,27 @@ def test_pitch_message_keeps_every_appliance():
     assert parsed.preferences.renewable_weight == 0.4
 
 
+def test_generic_electric_appliance_without_catalog():
+    parsed = parse_natural_language(
+        NaturalLanguageRequest(message="pelapapas electrico 0.3 kwh antes de las 22")
+    )
+    assert len(parsed.loads) == 1
+    assert "pelapapas" in parsed.loads[0].name.lower()
+    assert parsed.loads[0].energy_kwh == 0.3
+    assert parsed.loads[0].name != "Vehículo eléctrico"
+
+
+def test_movil_and_lavadora_in_one_message():
+    parsed = parse_natural_language(
+        NaturalLanguageRequest(
+            message="lavadora en la noche y cargar el celular antes de dormir listo a las 6",
+        )
+    )
+    names = {load.name for load in parsed.loads}
+    assert "Lavadora" in names
+    assert "Cargador móvil" in names
+
+
 def test_second_appliance_does_not_inherit_ev_kwh():
     parsed = parse_natural_language(
         NaturalLanguageRequest(

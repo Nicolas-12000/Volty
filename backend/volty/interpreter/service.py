@@ -10,6 +10,12 @@ from volty.core.config import settings
 from volty.core.schemas import LoadSpec, NaturalLanguageRequest, Objective, OptimizationPreferences, ParsedIntent
 from volty.gemini.intent import parse_intent_with_gemini
 
+
+def _merge_intents(old: ParsedIntent, new: ParsedIntent) -> ParsedIntent:
+    from volty.assistant.load_merge import merge_parsed_intents
+
+    return merge_parsed_intents(old, new)
+
 _ENERGY_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*kwh", re.I)
 _POWER_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*kw(?!h)", re.I)
 _DEADLINE_RE = re.compile(
@@ -17,6 +23,15 @@ _DEADLINE_RE = re.compile(
     re.I,
 )
 _CLOCK_RE = re.compile(r"\b(\d{1,2}):(\d{2})\b")
+_VEHICLE_HINT = re.compile(
+    r"\b(coche|vehiculo|vehículo|wallbox|auto electrico|cargar el coche)\b",
+    re.I,
+)
+_ELECTRIC_NOUN = re.compile(
+    r"\b((?:mi |el |la )?[a-záéíóúñ]{3,}(?:\s+[a-záéíóúñ]{3,})?)\s+electr(?:ico|ica)\b",
+    re.I,
+)
+
 _MUST_RUN = (
     "sin interrup",
     "no puede pausar",
@@ -45,6 +60,25 @@ _APPLIANCES: tuple[_Appliance, ...] = (
     _Appliance(r"secadora", "Secadora", "secadora", 2.0, 2.5),
     _Appliance(r"bomba de calor|\bacs\b", "Bomba de calor / ACS", "acs", 3.0, 4.5),
     _Appliance(
+        r"\b(movil|móvil|celular|smartphone|telefono|teléfono)\b",
+        "Cargador móvil",
+        "movil",
+        0.02,
+        0.1,
+    ),
+    _Appliance(
+        r"\b(ordenador|portatil|portatil|laptop|computadora|\bpc\b)",
+        "Ordenador / PC",
+        "pc",
+        0.35,
+        2.0,
+    ),
+    _Appliance(r"\b(tablet|ipad)\b", "Tablet", "tablet", 0.02, 0.05),
+    _Appliance(r"\b(consola|playstation|xbox|nintendo|switch)\b", "Consola", "consola", 0.2, 0.15),
+    _Appliance(r"\b(bicicleta electrica|e-bike|ebike)\b", "Bicicleta eléctrica", "ebike", 1.0, 0.5),
+    _Appliance(r"\b(patinete electrico|scooter electrico)\b", "Patinete eléctrico", "patinete", 0.5, 0.3),
+    _Appliance(r"\b(robot aspirador|roomba)\b", "Robot aspirador", "roomba", 0.1, 0.12),
+    _Appliance(
         r"coche electrico|vehiculo electrico|\bcoche\b|\bvehiculo\b|\bwallbox\b",
         "Vehículo eléctrico",
         "coche",
@@ -55,17 +89,53 @@ _APPLIANCES: tuple[_Appliance, ...] = (
 _APPLIANCE_RE = re.compile("|".join(f"(?:{item.pattern})" for item in _APPLIANCES), re.I)
 
 
-def parse_natural_language(request: NaturalLanguageRequest) -> ParsedIntent:
+def parse_rules_intent(request: NaturalLanguageRequest) -> ParsedIntent:
     raw = request.message.strip()
     if not raw:
         raise ValueError("Mensaje vacío.")
+    return _rule_based_parse(_fold(raw), request.context_load_name)
 
-    rules = _rule_based_parse(_fold(raw), request.context_load_name)
-    if len(rules.loads) >= 2:
-        return rules
-    gemini = parse_intent_with_gemini(raw)
-    if gemini and len(gemini.loads) >= len(rules.loads):
-        return gemini
+
+def parse_natural_language(request: NaturalLanguageRequest) -> ParsedIntent:
+    rules = parse_rules_intent(request)
+    gemini = parse_intent_with_gemini(request.message.strip())
+    if gemini and gemini.loads:
+        return _merge_intents(rules, gemini)
+    return rules
+
+
+def _guess_generic_name(text: str, default_name: str | None) -> str:
+    if default_name and default_name != "Vehículo eléctrico":
+        return default_name
+    match = _ELECTRIC_NOUN.search(text)
+    if match:
+        phrase = match.group(0).strip()
+        return phrase[:1].upper() + phrase[1:]
+    token = re.search(r"\b(?:mi|el|la)\s+([a-záéíóúñ]{3,24})\b", text, re.I)
+    if token and not _VEHICLE_HINT.search(token.group(1)):
+        return token.group(1).strip().title()
+    return "Carga flexible"
+
+
+def rules_defaulted_to_vehicle(intent: ParsedIntent, line: str) -> bool:
+    if len(intent.loads) != 1:
+        return False
+    if intent.loads[0].name != "Vehículo eléctrico":
+        return False
+    return not _VEHICLE_HINT.search(line) and bool(_ENERGY_RE.search(line) or _ELECTRIC_NOUN.search(line))
+
+
+def parse_line_intent(line: str, context_load_name: str | None = None) -> ParsedIntent:
+    """Un mensaje del hilo: reglas primero; Gemini si parece aparato fuera de catálogo."""
+    request = NaturalLanguageRequest(message=line, context_load_name=context_load_name)
+    rules = parse_rules_intent(request)
+    need_llm = rules_defaulted_to_vehicle(rules, line) or (
+        len(rules.loads) == 1 and rules.loads[0].name == "Carga flexible" and _ENERGY_RE.search(line)
+    )
+    if need_llm:
+        gemini = parse_intent_with_gemini(line.strip())
+        if gemini and gemini.loads:
+            return _merge_intents(rules, gemini)
     return rules
 
 
@@ -81,7 +151,13 @@ def _rule_based_parse(text: str, default_name: str | None) -> ParsedIntent:
     prefs = _preferences(text)
     matches = list(_APPLIANCE_RE.finditer(text))
     if not matches:
-        load = _single_load(text, default_name or "Vehículo eléctrico", "load-1", 11.0, now)
+        if _VEHICLE_HINT.search(text):
+            load = _single_load(text, "Vehículo eléctrico", "coche", 11.0, now)
+            return _intent([load], prefs)
+        name = _guess_generic_name(text, default_name)
+        slug = re.sub(r"[^a-z0-9]+", "-", _fold(name)).strip("-") or "carga-flex"
+        default_kw = min(2.0, _default_kw_for_name(name, 1.5))
+        load = _single_load(text, name, slug[:24], default_kw, now)
         return _intent([load], prefs)
 
     energies = _floats(_ENERGY_RE, text)
@@ -144,6 +220,22 @@ def _rule_based_parse(text: str, default_name: str | None) -> ParsedIntent:
     return _intent(loads, prefs)
 
 
+def _default_energy_for_name(name: str) -> float:
+    folded = name.lower()
+    for item in _APPLIANCES:
+        if item.slug in folded or item.name.lower() in folded:
+            return item.default_kwh
+    return 30.0
+
+
+def _default_kw_for_name(name: str, fallback: float) -> float:
+    folded = name.lower()
+    for item in _APPLIANCES:
+        if item.slug in folded or item.name.lower() in folded:
+            return item.default_kw
+    return fallback
+
+
 def _single_load(
     text: str,
     name: str,
@@ -157,8 +249,8 @@ def _single_load(
     return LoadSpec(
         id=load_id,
         name=name,
-        energy_kwh=energies[0] if energies else 30.0,
-        max_power_kw=powers[0] if powers else default_kw,
+        energy_kwh=energies[0] if energies else _default_energy_for_name(name),
+        max_power_kw=powers[0] if powers else _default_kw_for_name(name, default_kw),
         window_start=now,
         deadline=deadlines[0],
         must_run=any(phrase in text for phrase in _MUST_RUN),
@@ -214,6 +306,11 @@ def _deadlines(text: str, now: datetime) -> list[datetime]:
     soft = re.search(r"\b(\d{1,2})(?::(\d{2}))?\s*(?:de la manana|de la tarde)\b", scrubbed)
     if soft:
         return [_deadline_from_match(soft, scrubbed, now)]
+    if any(p in scrubbed for p in ("antes de dormir", "por la noche", "esta noche", "de noche")):
+        night = now.replace(hour=23, minute=0, second=0, microsecond=0)
+        if night <= now:
+            night = now.replace(hour=22, minute=30, second=0, microsecond=0)
+        return [night]
     return [_default_deadline(now)]
 
 
